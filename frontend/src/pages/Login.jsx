@@ -3,19 +3,29 @@ import React from "react";
 const Login = () => {
   return (
     <>
-      <div className="container">
+      <div className="container justify-content-center px-5 align-items-center min-vh-100">
         <div
-          className="d-flex flex-column justify-content-center gap-3 mt-5"
+          className="card shadow-lg mt-5 py-5 px-4"
           style={{ maxWidth: "300px", margin: "auto" }}
         >
           <h4 className="text-center my-3">Login Form</h4>
-          <label htmlFor="">User Name</label>
+          <label className="my-2">User Name</label>
           <input className="form-control my-1" type="text" />
-          <label htmlFor="">Password</label>
+          <label className="my-2" htmlFor="">
+            Password
+          </label>
           <input className="form-control my-1" type="password" />
-          <button className="btn btn-outline-dark mt-2">Login</button>
+          <button className="btn btn-dark mt-3">Login</button>
 
-          <a style={{ textAlign: "center", textDecoration: null }} href="#">
+          <a
+            style={{
+              textAlign: "center",
+              textDecoration: null,
+              fontSize: "12px",
+              marginTop: "10px",
+            }}
+            href="#"
+          >
             Don't Have An Account
           </a>
         </div>

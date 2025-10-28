@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 const useFetch = (url) => {
-  let [products, setProducts] = useState([]);
+  const [products, setProducts] = useState([]);
+  const [loading, isLoading] = useState(true);
+  const [isError, setIsError] = useState("");
+
   useEffect(() => {
     const apiCall = async () => {
       try {
@@ -9,10 +12,13 @@ const useFetch = (url) => {
         setProducts(response.data);
       } catch (error) {
         console.log(error);
+        setIsError(error.message);
+      } finally {
+        isLoading(false);
       }
     };
     apiCall();
   }, [url]);
-  return { products };
+  return { products, loading, isError };
 };
 export default useFetch;

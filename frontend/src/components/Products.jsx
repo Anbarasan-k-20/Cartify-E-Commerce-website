@@ -30,8 +30,8 @@ const Products = () => {
         <div className="container mt-4">
           <h2 className="text-center mb-4">Products</h2>
           <div className="row">
-            {products.map((product) => (
-              <div className="col-md-4 mb-4" key={product.id}>
+            {products.map((product, index) => (
+              <div className="col-md-4 mb-4" key={index}>
                 <Card className="h-100 shadow-sm text-center">
                   <div
                     style={{
@@ -85,7 +85,7 @@ const Products = () => {
               </div>
             ))}
             {isError && (
-              <p className="text-danger text-center mt-3">Error: {isError}</p>
+              <p className="text-danger text-center mt-5">Error: {isError}</p>
             )}
           </div>
         </div>

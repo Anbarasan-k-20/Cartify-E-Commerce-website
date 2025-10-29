@@ -1,5 +1,5 @@
 import React from "react";
-
+let handleClick = () => {};
 const Login = () => {
   return (
     <>
@@ -24,7 +24,8 @@ const Login = () => {
               fontSize: "12px",
               marginTop: "10px",
             }}
-            href="#"
+            type="button"
+            onClick={handleClick}
           >
             Don't Have An Account
           </a>

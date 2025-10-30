@@ -1,14 +1,18 @@
 import React from "react";
-let handleClick = () => {};
+import { useNavigate } from "react-router-dom";
 const Login = () => {
+  let navigate = useNavigate(); //  min-vh-100
   return (
     <>
-      <div className="container justify-content-center px-5 align-items-center min-vh-100">
+      <div
+        className="container d-flex justify-content-center align-items-center"
+        style={{ minHeight: "80vh" }}
+      >
         <div
-          className="card shadow-lg mt-5 py-5 px-4"
-          style={{ maxWidth: "300px", margin: "auto" }}
+          className="d-flex flex-column w-100 px-4 shadow-lg py-5 px-4 rounded-4"
+          style={{ maxWidth: "350px" }}
         >
-          <h4 className="text-center my-3">Login Form</h4>
+          <h4 className="pb-3">Login Form</h4>
           <label className="my-2">User Name</label>
           <input className="form-control my-1" type="text" />
           <label className="my-2" htmlFor="">
@@ -25,7 +29,9 @@ const Login = () => {
               marginTop: "10px",
             }}
             type="button"
-            onClick={handleClick}
+            onClick={() => {
+              navigate("/createaccount");
+            }}
           >
             Don't Have An Account
           </a>

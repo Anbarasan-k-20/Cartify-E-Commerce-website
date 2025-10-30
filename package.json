@@ -1,6 +1,25 @@
 {
+  "name": "e-commerce-website",
+  "version": "1.0.0",
+  "description": "",
+  "homepage": "https://github.com/Anbarasan-k-20/Cartify-E-Commerce-website#readme",
+  "bugs": {
+    "url": "https://github.com/Anbarasan-k-20/Cartify-E-Commerce-website/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Anbarasan-k-20/Cartify-E-Commerce-website.git"
+  },
+  "license": "ISC",
+  "author": "Anbarasan K",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
   "dependencies": {
     "bootstrap": "^5.3.8",
     "react-bootstrap": "^2.10.10"
-  }
+  },
+  "devDependencies": {}
 }

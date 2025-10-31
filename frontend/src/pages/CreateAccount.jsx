@@ -131,7 +131,7 @@ const CreateAccount = () => {
                 textAlign: "center",
                 textDecoration: null,
                 fontSize: "12px",
-                marginTop: "10px",
+                marginTop: "20px",
               }}
               type="button"
               onClick={() => {

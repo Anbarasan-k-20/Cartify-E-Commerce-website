@@ -12,8 +12,8 @@ const Products = () => {
     return (
       <>
         <div
-          style={{ height: "50vh" }}
-          className="d-flex justify-content-center align-items-center"
+          // style={{ height: "50vh" }}
+          className="d-flex justify-content-center align-items-center vh-100"
         >
           <Atom
             color="#6500dd"

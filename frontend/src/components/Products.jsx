@@ -11,10 +11,7 @@ const Products = () => {
   if (loading) {
     return (
       <>
-        <div
-          // style={{ height: "50vh" }}
-          className="d-flex justify-content-center align-items-center vh-100"
-        >
+        <div className="d-flex justify-content-center align-items-center vh-100">
           <Atom
             color="#6500dd"
             size="medium"
@@ -32,7 +29,7 @@ const Products = () => {
           <div className="row">
             {products.map((product, index) => (
               <div className="col-md-4 mb-4" key={index}>
-                <Card className="h-100 shadow-sm text-center">
+                <Card className="h-100 shadow-sm text-center product-card">
                   <div
                     style={{
                       height: "300px",

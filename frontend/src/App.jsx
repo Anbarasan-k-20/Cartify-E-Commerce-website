@@ -5,6 +5,7 @@ import Login from "./pages/Login";
 import NavBar from "./components/NavBar";
 import Products from "./components/Products";
 import CreateAccount from "./pages/CreateAccount";
+import "../src/App.css";
 const App = () => {
   return (
     <>

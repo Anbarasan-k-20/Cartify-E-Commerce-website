@@ -1,12 +1,14 @@
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 
+dotenv.config();
+
 export const connectDB = async () => {
-  mongoose
-    .connect(
-      "mongodb+srv://anbarasankrishna52_db_user:anbu1234@myecom.zzfvjyn.mongodb.net/?appName=MyEcom"
-    )
-    .then((con) => {
-      console.log(`Mongo DB Database connected With ${con.connection.host}`);
-    });
+  try {
+    const connect = await mongoose.connect(process.env.MONGODB_URI);
+    console.log(`MongoDB Connected: ${connect.connection.host}`);
+  } catch (error) {
+    console.error("Database connection error:", error);
+    process.exit(1);
+  }
 };

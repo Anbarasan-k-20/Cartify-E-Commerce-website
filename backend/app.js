@@ -1,25 +1,41 @@
-// const express = require("express");   // i ve changed the type ="module"
-
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import router from "./routes/productsRoutes.js";
 import { connectDB } from "./db.js";
 
+// import errorHandling from "./middleware/errorHandling.js";
+
 const app = express();
 
 dotenv.config();
 
-// To Connect DB
+// Middleware
+
+app.use(cors());
+app.use(express.json());
+
+// Connect to Database
 
 connectDB();
 
+// Routes
+
 app.get("/", (req, res) => {
-  res.json({ message: "hello" });
+  res.json({
+    success: true,
+    message: "Cartify API is running!",
+    version: "1.0",
+  });
 });
 
 app.use("/api/v1", router);
 
-app.listen(process.env.PORT, () => {
-  console.log(`Example app listening on port ${process.env.PORT}`);
+//  handling middleware
+//  app.use(errorHandling);
+
+const PORT = process.env.PORT;
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });

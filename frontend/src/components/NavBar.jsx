@@ -6,7 +6,7 @@ const NavBar = () => {
     <nav className="navbar navbar-expand-lg navbar-dark bg-dark p-3 shadow-sm">
       <div className="container">
         <Link to="/" className="navbar-brand fw-bold d-flex align-items-center">
-          <PiShoppingCartSimpleBold size={28} color="white" className="me-2" />
+          <PiShoppingCartSimpleBold size={28} color="grey" className="me-2" />
           CARTIFY
         </Link>
         <button

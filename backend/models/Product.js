@@ -19,18 +19,10 @@ const productSchema = new mongoose.Schema(
     category: {
       type: String,
       required: true,
-      enum: {
-        values: [
-          "Electronics",
-          "Clothes",
-          "Books",
-          "Furniturs",
-          "Home Appliences",
-        ],
-      },
     },
     image: {
       type: String,
+      required: true,
     },
     rating: {
       rate: {

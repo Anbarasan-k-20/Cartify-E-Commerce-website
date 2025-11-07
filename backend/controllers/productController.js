@@ -1,8 +1,10 @@
 import Product from "../models/Product.js";
+import Category from "../models/Category.js";
+import { uploadToCloudinary } from "../middleware/uploadImage.js";
+
 // Get all products
 export const getAllProducts = async (req, res) => {
   try {
-    //    const query = {
     const products = await Product.find().sort({ createdAt: -1 });
     res.status(200).json({
       success: true,
@@ -18,10 +20,10 @@ export const getAllProducts = async (req, res) => {
 };
 
 // Create new product
-export const createProduct = async (req, res, next) => {
+export const createProduct = async (req, res) => {
   try {
-    const { title, price, description, category, rating } = req.body;
-    // Validate required fields
+    const { title, price, description, category, rate, count } = req.body;
+
     if (!title || !price || !description || !category) {
       return res.status(400).json({
         success: false,
@@ -29,17 +31,25 @@ export const createProduct = async (req, res, next) => {
       });
     }
 
-    if (!title || !price || !description || !category)
-      return next(new Error("Enter all the fields"));
+    let existingCategory = await Category.findOne({ name: category });
+    if (!existingCategory) {
+      existingCategory = await Category.create({ name: category });
+    }
+
+    let imageUrl = "";
+    if (req.file) {
+      imageUrl = await uploadToCloudinary(req.file.buffer);
+    }
 
     const product = await Product.create({
       title,
       price: parseFloat(price),
       description,
-      category,
+      category: existingCategory.name,
+      image: imageUrl,
       rating: {
-        rate: rating?.rate ? parseFloat(rating.rate) : 0,
-        count: rating?.count ? parseInt(rating.count) : 0,
+        rate: rate ? parseFloat(rate) : 0,
+        count: count ? parseInt(count) : 0,
       },
     });
 
@@ -49,6 +59,7 @@ export const createProduct = async (req, res, next) => {
       data: product,
     });
   } catch (error) {
+    console.error("Error creating product:", error);
     res.status(500).json({
       success: false,
       message: "Error creating product",
@@ -56,14 +67,3 @@ export const createProduct = async (req, res, next) => {
     });
   }
 };
-
-// export const deleteProduct = async(req,res,next) =>{
-//   const {id} = req.params
-
-//   try{
-
-//   }
-//   catch(err){
-
-//   }
-// }

@@ -68,9 +68,11 @@ const Login = () => {
               name="password"
               value={fields.password}
             />
-            <button type="submit" className="btn btn-dark mt-3">
-              Login
-            </button>
+            <div>
+              <button type="submit" className="btn btn-dark mt-3">
+                Login
+              </button>
+            </div>
 
             <a
               style={{

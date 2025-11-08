@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import router from "./routes/productsRoutes.js";
 import categoryRoutes from "./routes/categoryRoutes.js";
+import cartRoute from "./routes/cartRoute.js";
 import { connectDB } from "./db.js";
 
 // import errorHandling from "./middleware/errorHandling.js";
@@ -32,6 +33,7 @@ app.get("/", (req, res) => {
 
 app.use("/api/v1", router);
 app.use("/api/v1/categories", categoryRoutes);
+app.use("/api/v1/cart", cartRoute);
 
 //  app.use(errorHandling);
 

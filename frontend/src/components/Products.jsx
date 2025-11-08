@@ -4,12 +4,16 @@ import useFetch from "./customHook/useFetch";
 import { GiShoppingCart } from "react-icons/gi";
 import { FcLike } from "react-icons/fc";
 import { Atom } from "react-loading-indicators";
-
+import { useDispatch } from "react-redux";
+import { addToCart } from "../store/cartSliderReducer";
 const Products = () => {
+  const dispatch = useDispatch();
   const { products, loading, isError } = useFetch(
     "http://localhost:3000/api/v1/products"
   );
-
+  const handleCart = (product) => {
+    dispatch(addToCart(product));
+  };
   if (loading) {
     return (
       <>
@@ -65,6 +69,7 @@ const Products = () => {
                       </Card.Text>
                       <div className="d-flex justify-content-between">
                         <Button
+                          onClick={() => handleCart(product)}
                           variant="dark"
                           className="d-flex gap-2 align-items-center justify-content-center"
                         >

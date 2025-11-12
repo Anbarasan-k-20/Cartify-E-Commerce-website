@@ -25,22 +25,11 @@ const cartSchema = new mongoose.Schema(
       required: true,
     },
     rating: {
-      rate: {
-        type: Number,
-        default: 0,
-        min: 0,
-        max: 5,
-      },
-      count: {
-        type: Number,
-        default: 0,
-        min: 0,
-      },
+      rate: { type: Number, default: 0, min: 0, max: 5 },
+      count: { type: Number, default: 0, min: 0 },
     },
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true }
 );
 
 export default mongoose.model("Cart", cartSchema);

@@ -44,10 +44,7 @@ const Login = () => {
               Login Success
             </Alert>
           )}
-          <div
-            className="d-flex flex-column shadow-lg py-5 px-4 rounded-4"
-            //
-          >
+          <div className="d-flex flex-column shadow-lg py-5 px-4 rounded-4">
             <h4 className="pb-3">Login Form</h4>
             <label className="my-2">User Name</label>
             <input
@@ -68,12 +65,11 @@ const Login = () => {
               name="password"
               value={fields.password}
             />
-            <div>
+            <div className="d-flex justify-content-end">
               <button type="submit" className="btn btn-dark mt-3">
                 Login
               </button>
             </div>
-
             <a
               style={{
                 textAlign: "center",

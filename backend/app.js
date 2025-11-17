@@ -12,7 +12,7 @@ const app = express();
 
 dotenv.config();
 
-// Middleware
+// global  Middleware
 
 app.use(cors());
 app.use(express.json());
@@ -34,8 +34,6 @@ app.get("/", (req, res) => {
 app.use("/api/v1", router);
 app.use("/api/v1/categories", categoryRoutes);
 app.use("/api/v1/cart", cartRoute);
-
-//  app.use(errorHandling);
 
 const PORT = process.env.PORT;
 

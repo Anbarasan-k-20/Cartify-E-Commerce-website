@@ -24,6 +24,12 @@ const cartSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    quantity: {
+      type: Number,
+      default: 1,
+      min: 1,
+      max: 5,
+    },
     rating: {
       rate: { type: Number, default: 0, min: 0, max: 5 },
       count: { type: Number, default: 0, min: 0 },

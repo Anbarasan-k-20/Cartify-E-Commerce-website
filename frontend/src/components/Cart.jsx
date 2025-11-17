@@ -1,17 +1,62 @@
-import { useEffect } from "react";
+// src/components/Cart.jsx
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchCart, removeFromCartDB } from "../store/cartSliderReducer";
+import Alert from "@mui/material/Alert";
+import {
+  fetchCart,
+  removeFromCartDB,
+  increaseQtyDB,
+  decreaseQtyDB,
+} from "../store/cartSliderReducer"; // <- adjust path if needed
 
 export default function Cart() {
   const dispatch = useDispatch();
-  const { cart, loading, error } = useSelector((state) => state.cart);
+  const {
+    cart = [],
+    loading,
+    error,
+  } = useSelector((state) => state.cart || {});
+  const [showAlert, setShowAlert] = useState(false);
+  const [busyId, setBusyId] = useState(null); // disables buttons per-item while request in-flight
 
   useEffect(() => {
     dispatch(fetchCart());
   }, [dispatch]);
 
-  const handleDelete = (id) => {
-    dispatch(removeFromCartDB(id));
+  const handleDelete = async (id) => {
+    try {
+      setBusyId(id);
+      await dispatch(removeFromCartDB(id)).unwrap();
+      setShowAlert(true);
+      setTimeout(() => setShowAlert(false), 2000);
+    } catch (err) {
+      console.error("Delete failed:", err);
+      // optional: show user feedback
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const handleIncrease = async (id) => {
+    try {
+      setBusyId(id);
+      await dispatch(increaseQtyDB(id)).unwrap();
+    } catch (err) {
+      console.error("Increase failed:", err);
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const handleDecrease = async (id) => {
+    try {
+      setBusyId(id);
+      await dispatch(decreaseQtyDB(id)).unwrap();
+    } catch (err) {
+      console.error("Decrease failed:", err);
+    } finally {
+      setBusyId(null);
+    }
   };
 
   if (loading) {
@@ -21,10 +66,18 @@ export default function Cart() {
   if (error) {
     return <div className="text-danger text-center py-5">{error}</div>;
   }
+
   return (
-    <div className="container my-5 bg-light p-2">
+    <div className="container my-5 bg-light p-3">
+      {showAlert && (
+        <Alert severity="success" className="mb-3">
+          Cart item deleted successfully!
+        </Alert>
+      )}
+
       <h4 className="py-2 text-center text-md-start">Cart List</h4>
-      {cart.length === 0 ? (
+
+      {!cart || cart.length === 0 ? (
         <p className="text-center">No items in cart.</p>
       ) : (
         cart.map((item) => (
@@ -52,14 +105,33 @@ export default function Cart() {
 
               <div className="d-flex flex-wrap justify-content-center justify-content-md-start align-items-center gap-2">
                 <div className="btn-group border rounded-pill">
-                  <button className="btn btn-sm">-</button>
-                  <span className="px-3 py-1 fw-bold">1</span>
-                  <button className="btn btn-sm">+</button>
+                  <button
+                    className="btn btn-sm"
+                    onClick={() => handleDecrease(item._id)}
+                    disabled={busyId === item._id}
+                    aria-label={`decrease-${item._id}`}
+                  >
+                    -
+                  </button>
+
+                  <span className="px-3 py-1 fw-bold">
+                    {item.quantity ?? 1}
+                  </span>
+
+                  <button
+                    className="btn btn-sm"
+                    onClick={() => handleIncrease(item._id)}
+                    disabled={busyId === item._id || item.quantity >= 5}
+                    aria-label={`increase-${item._id}`}
+                  >
+                    +
+                  </button>
                 </div>
 
                 <button
                   className="btn btn-danger btn-sm"
                   onClick={() => handleDelete(item._id)}
+                  disabled={busyId === item._id}
                 >
                   Delete
                 </button>
@@ -73,7 +145,10 @@ export default function Cart() {
             </div>
 
             <div className="col-12 col-md-2 text-center text-md-end mt-3 mt-md-0">
-              <h5 className="fw-bold">₹{item.price}</h5>
+              {/* show total price based on quantity */}
+              <h5 className="fw-bold">
+                ₹{(item.price * (item.quantity || 1)).toFixed(2)}
+              </h5>
             </div>
           </div>
         ))

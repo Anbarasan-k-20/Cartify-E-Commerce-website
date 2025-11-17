@@ -5,6 +5,11 @@ const Home = () => {
     <>
       <div className="container">
         <Products />
+        <footer>
+          <div className="d-flex align-items-center justify-content-center my-5">
+            <p>©2025 Cartify,Vyoobam Tech</p>
+          </div>
+        </footer>
       </div>
     </>
   );

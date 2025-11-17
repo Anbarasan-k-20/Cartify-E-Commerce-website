@@ -2,16 +2,29 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
 const API_URL = "http://localhost:3000/api/v1/cart";
+
+// GET all cart items
 export const fetchCart = createAsyncThunk("cart/fetchCart", async () => {
   const res = await axios.get(API_URL);
   return res.data.data;
 });
 
+// ADD new item (or backend handles duplicate check)
 export const addToCartDB = createAsyncThunk(
   "cart/addToCartDB",
-  async (item, { rejectWithValue }) => {
+  async (product, { rejectWithValue }) => {
     try {
-      const res = await axios.post(API_URL, item);
+      const res = await axios.post(API_URL, {
+        productId: product._id,
+        title: product.title,
+        price: product.price,
+        description: product.description,
+        category: product.category,
+        image: product.image,
+        rating: product.rating,
+        quantity: 1,
+      });
+
       return res.data.data;
     } catch (err) {
       return rejectWithValue(err.response?.data?.message || "Add failed");
@@ -19,14 +32,41 @@ export const addToCartDB = createAsyncThunk(
   }
 );
 
+// INCREASE quantity
+export const increaseQtyDB = createAsyncThunk(
+  "cart/increaseQtyDB",
+  async (id, { rejectWithValue }) => {
+    try {
+      const res = await axios.patch(`${API_URL}/increase/${id}`);
+      return res.data.data;
+    } catch {
+      return rejectWithValue("Increase failed");
+    }
+  }
+);
+
+// DECREASE quantity
+export const decreaseQtyDB = createAsyncThunk(
+  "cart/decreaseQtyDB",
+  async (id, { rejectWithValue }) => {
+    try {
+      const res = await axios.patch(`${API_URL}/decrease/${id}`);
+      return res.data.data;
+    } catch {
+      return rejectWithValue("Decrease failed");
+    }
+  }
+);
+
+// DELETE item
 export const removeFromCartDB = createAsyncThunk(
   "cart/removeFromCartDB",
   async (id, { rejectWithValue }) => {
     try {
       await axios.delete(`${API_URL}/${id}`);
       return id;
-    } catch (err) {
-      return rejectWithValue(err.response?.data?.message || "Delete failed");
+    } catch {
+      return rejectWithValue("Delete failed");
     }
   }
 );
@@ -42,6 +82,7 @@ const cartSlice = createSlice({
   extraReducers: (builder) => {
     builder
 
+      // FETCH
       .addCase(fetchCart.pending, (state) => {
         state.loading = true;
       })
@@ -54,14 +95,51 @@ const cartSlice = createSlice({
         state.error = action.error.message;
       })
 
+      // ADD
       .addCase(addToCartDB.fulfilled, (state, action) => {
-        state.cart.push(action.payload);
+        const newItem = action.payload;
+        const existing = state.cart.find(
+          (i) => i.productId === newItem.productId
+        );
+
+        if (existing) {
+          if (existing.quantity < 5) {
+            existing.quantity += 1;
+          }
+        } else {
+          state.cart.push(newItem);
+        }
       })
 
+      // INCREASE
+      .addCase(increaseQtyDB.fulfilled, (state, action) => {
+        const updated = action.payload;
+        const item = state.cart.find((i) => i._id === updated._id);
+
+        if (item) {
+          item.quantity = updated.quantity;
+        }
+      })
+
+      // DECREASE
+      .addCase(decreaseQtyDB.fulfilled, (state, action) => {
+        const updated = action.payload;
+        const item = state.cart.find((i) => i._id === updated._id);
+
+        if (item) {
+          item.quantity = updated.quantity;
+        }
+      })
+
+      // REMOVE
       .addCase(removeFromCartDB.fulfilled, (state, action) => {
-        state.cart = state.cart.filter((item) => item._id !== action.payload);
+        state.cart = state.cart.filter((i) => i._id !== action.payload);
       });
   },
 });
 
 export default cartSlice.reducer;
+
+// CART ICON COUNT
+export const selectCartCount = (state) =>
+  state.cart.cart.reduce((sum, item) => sum + item.quantity, 0);

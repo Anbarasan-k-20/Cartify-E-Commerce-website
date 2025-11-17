@@ -117,14 +117,16 @@ const CreateAccount = () => {
                 onChange={handlechange}
                 type="text"
               />
-              <button
-                onClick={handleSubmit}
-                className="btn btn-dark mt-3"
-                onChange={handlechange}
-                type="submit"
-              >
-                Create Account
-              </button>
+              <div className="d-flex justify-content-end">
+                <button
+                  onClick={handleSubmit}
+                  className="btn btn-dark mt-3"
+                  onChange={handlechange}
+                  type="submit"
+                >
+                  Create Account
+                </button>
+              </div>
             </form>
             <a
               style={{

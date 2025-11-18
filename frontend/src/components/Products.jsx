@@ -32,9 +32,11 @@ const Products = () => {
 
   // GLOBAL ADD TO CART FUNCTION
   const handleCart = async (product) => {
+    console.log(product);
+
     try {
       await dispatch(addToCartDB(product)).unwrap();
-
+      // await dispatch(addToCartDB(product._id));
       setSuccessMessage(`${product.title} added to cart successfully!`);
       setTimeout(() => setSuccessMessage(""), 3000);
     } catch (err) {
@@ -71,6 +73,19 @@ const Products = () => {
               onClick={() => openProductModal(product)}
               style={{ cursor: "pointer" }}
             >
+              <div className="product-card position-relative">
+                {/* Badge appears in top-left */}
+                {product.stock < 10 && (
+                  <span
+                    className="badge bg-danger px-2 py-1 position-absolute custom-badge"
+                    style={{ top: "10px", left: "10px", zIndex: 1 }}
+                  >
+                    Only {product.stock} left!
+                  </span>
+                )}
+
+                {/* Product content here */}
+              </div>
               <Card.Img
                 variant="top"
                 src={product.image}

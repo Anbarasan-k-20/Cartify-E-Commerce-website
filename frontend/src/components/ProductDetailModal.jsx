@@ -31,9 +31,9 @@ const ProductDetailModal = ({ product, onClose, onAddToCart, onBuyNow }) => {
           <p>
             <strong>Brand:</strong> {product.brand || "N/A"}
           </p>
-          <p>
+          {/* <p>
             <strong>Stock:</strong> {product.stock}
-          </p>
+          </p> */}
           <p>
             <strong>Category:</strong> {product.category}
           </p>

@@ -1,3 +1,4 @@
+//controllers/cartList.jsx
 import cartSchema from "../models/cartModel.js";
 
 export const getCartList = async (req, res) => {
@@ -13,35 +14,50 @@ export const getCartList = async (req, res) => {
   }
 };
 // updated funtionality for cart adding with limitations
+
 export const addToCart = async (req, res) => {
   try {
-    const { productId } = req.body;
+    const { productId, title, price, description, category, image, rating } =
+      req.body;
+
+    if (!productId || !title || !price || !description || !category || !image) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Missing required fields" });
+    }
 
     const existing = await cartSchema.findOne({ productId });
 
     if (existing) {
-      if (existing.quantity >= 5) {
+      if (existing.quantity >= 5)
         return res
           .status(400)
           .json({ success: false, message: "Max limit reached" });
-      }
-
-      existing.quantity += 1;
+      existing.quantity = Math.min(existing.quantity + 1, 5);
       await existing.save();
-
       return res.status(200).json({ success: true, data: existing });
     }
 
-    // New item
-    const newItem = await cartSchema.create(req.body);
-
-    res.status(201).json({ success: true, data: newItem });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Error adding item to cart",
-      error: error.message,
+    const newItem = await cartSchema.create({
+      productId,
+      title,
+      price,
+      description,
+      category,
+      image,
+      rating,
     });
+
+    return res.status(201).json({ success: true, data: newItem });
+  } catch (error) {
+    console.error("addToCart error:", error);
+    return res
+      .status(500)
+      .json({
+        success: false,
+        message: "Error adding item to cart",
+        error: error.message,
+      });
   }
 };
 

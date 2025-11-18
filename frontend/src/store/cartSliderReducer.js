@@ -1,3 +1,4 @@
+// store/cartSlicerReducer.jsx
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
@@ -9,12 +10,30 @@ export const fetchCart = createAsyncThunk("cart/fetchCart", async () => {
   return res.data.data;
 });
 
-// ADD new item (or backend handles duplicate check)
+// export const addToCartDB = createAsyncThunk(
+//   "cart/addToCartDB",
+//   async (product, { rejectWithValue }) => {
+//     try {
+//       const res = await axios.post(API_URL, {
+//         productId: product._id,
+//         title: product.title,
+//         price: product.price,
+//         image: product.image,
+//         category: product.category,
+//         rating: product.rating,
+//       });
+//       return res.data.data;
+//     } catch (err) {
+//       return rejectWithValue(err.response?.data?.message || "Add failed");
+//     }
+//   }
+// );
+
 export const addToCartDB = createAsyncThunk(
   "cart/addToCartDB",
   async (product, { rejectWithValue }) => {
     try {
-      const res = await axios.post(API_URL, {
+      const payload = {
         productId: product._id,
         title: product.title,
         price: product.price,
@@ -22,9 +41,8 @@ export const addToCartDB = createAsyncThunk(
         category: product.category,
         image: product.image,
         rating: product.rating,
-        quantity: 1,
-      });
-
+      };
+      const res = await axios.post(API_URL, payload);
       return res.data.data;
     } catch (err) {
       return rejectWithValue(err.response?.data?.message || "Add failed");
@@ -32,7 +50,7 @@ export const addToCartDB = createAsyncThunk(
   }
 );
 
-// INCREASE quantity
+// Increase quantity
 export const increaseQtyDB = createAsyncThunk(
   "cart/increaseQtyDB",
   async (id, { rejectWithValue }) => {
@@ -45,7 +63,7 @@ export const increaseQtyDB = createAsyncThunk(
   }
 );
 
-// DECREASE quantity
+// Decrease quantity
 export const decreaseQtyDB = createAsyncThunk(
   "cart/decreaseQtyDB",
   async (id, { rejectWithValue }) => {
@@ -58,7 +76,7 @@ export const decreaseQtyDB = createAsyncThunk(
   }
 );
 
-// DELETE item
+// Delete item
 export const removeFromCartDB = createAsyncThunk(
   "cart/removeFromCartDB",
   async (id, { rejectWithValue }) => {
@@ -95,40 +113,43 @@ const cartSlice = createSlice({
         state.error = action.error.message;
       })
 
-      // ADD
+      // ADD — replace existing OR add new
       .addCase(addToCartDB.fulfilled, (state, action) => {
         const newItem = action.payload;
-        const existing = state.cart.find(
-          (i) => i.productId === newItem.productId
+
+        // const index = state.cart.findIndex(
+        //   (i) => i.productId === newItem.productId
+        // );
+
+        const index = state.cart.findIndex(
+          (i) =>
+            i.productId === newItem.productId ||
+            i.productId?._id === newItem.productId ||
+            i.productId === newItem.productId?._id ||
+            i.productId?._id === newItem.productId?._id
         );
 
-        if (existing) {
-          if (existing.quantity < 5) {
-            existing.quantity += 1;
-          }
+        if (index !== -1) {
+          // Replace existing item with updated one from backend
+          state.cart[index] = newItem;
         } else {
+          // Add new product
           state.cart.push(newItem);
         }
       })
 
-      // INCREASE
+      // INCREASE qty
       .addCase(increaseQtyDB.fulfilled, (state, action) => {
         const updated = action.payload;
-        const item = state.cart.find((i) => i._id === updated._id);
-
-        if (item) {
-          item.quantity = updated.quantity;
-        }
+        const index = state.cart.findIndex((i) => i._id === updated._id);
+        if (index !== -1) state.cart[index] = updated;
       })
 
-      // DECREASE
+      // DECREASE qty
       .addCase(decreaseQtyDB.fulfilled, (state, action) => {
         const updated = action.payload;
-        const item = state.cart.find((i) => i._id === updated._id);
-
-        if (item) {
-          item.quantity = updated.quantity;
-        }
+        const index = state.cart.findIndex((i) => i._id === updated._id);
+        if (index !== -1) state.cart[index] = updated;
       })
 
       // REMOVE

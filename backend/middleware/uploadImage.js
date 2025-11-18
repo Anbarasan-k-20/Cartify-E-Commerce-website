@@ -1,3 +1,4 @@
+//D:\E Commerce Website\backend\middleware\uploadImage.js
 import { v2 as cloudinary } from "cloudinary";
 import multer from "multer";
 import dotenv from "dotenv";

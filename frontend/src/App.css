@@ -110,3 +110,9 @@
     flex-direction: row;
   }
 }
+
+/*  */
+
+.custom-badge {
+  border-radius: 5px !important;
+}

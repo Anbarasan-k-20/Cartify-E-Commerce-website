@@ -1,3 +1,4 @@
+// controllers/productControllers
 import Product from "../models/Product.js";
 import Category from "../models/Category.js";
 import { uploadToCloudinary } from "../middleware/uploadImage.js";

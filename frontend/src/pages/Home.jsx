@@ -7,7 +7,7 @@ const Home = () => {
         <Products />
         <footer>
           <div className="d-flex align-items-center justify-content-center my-5">
-            <p>©2025 Cartify,Vyoobam Tech</p>
+            <p>©2025 Cartify ALL Rights Reserved.</p>
           </div>
         </footer>
       </div>

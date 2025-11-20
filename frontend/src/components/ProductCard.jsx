@@ -1,10 +1,16 @@
 // src/components/ProductCard.jsx
 import Card from "react-bootstrap/Card";
-const ProductCard = ({ product, onClick }) => {
+import { useNavigate } from "react-router-dom";
+const ProductCard = ({ product }) => {
+  const navigate = useNavigate();
+
   return (
     <Card
       className="h-100 shadow-sm text-center product-card"
-      onClick={onClick}
+      onClick={() => {
+        console.log("PRODUCT ID:", product._id);
+        navigate(`/product/${product._id}`);
+      }}
       style={{ cursor: "pointer" }}
     >
       <Card.Img

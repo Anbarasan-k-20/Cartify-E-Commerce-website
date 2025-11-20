@@ -7,8 +7,13 @@
   transform: scale(1.05);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
 }
-/* Overlay */
-.modal-overlay {
+
+.custom-badge {
+  border-radius: 7px !important;
+}
+
+/* * Overlay */
+/* .modal-overlay {
   position: fixed;
   inset: 0;
   backdrop-filter: blur(4px);
@@ -16,12 +21,12 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 16px; /* prevents modal from touching edges on small screens */
+  padding: 16px; 
   z-index: 2000;
-}
+} */
 
 /* Modal container */
-.modal-card {
+/* .modal-card {
   background: #fff;
   width: 100%;
   max-width: 900px;
@@ -32,18 +37,18 @@
   display: grid;
   grid-template-columns: 1fr;
   gap: 20px;
-}
+} */
 
 /* Desktop layout (split view) */
-@media (min-width: 768px) {
+/* @media (min-width: 768px) {
   .modal-card {
     grid-template-columns: 1fr 1fr;
     padding: 30px;
   }
-}
+} */
 
 /* Animation */
-@keyframes zoomIn {
+/* @keyframes zoomIn {
   from {
     transform: scale(0.8);
     opacity: 0;
@@ -52,10 +57,10 @@
     transform: scale(1);
     opacity: 1;
   }
-}
+} */
 
 /* Close button */
-.modal-close-btn {
+/* .modal-close-btn {
   position: absolute;
   top: 12px;
   right: 12px;
@@ -67,52 +72,46 @@
   height: 34px;
   font-size: 18px;
   cursor: pointer;
-}
+} */
 
 /* Product Image */
-.modal-product-img {
+/* .modal-product-img {
   width: 100%;
   height: auto;
   max-height: 300px;
   object-fit: contain;
-}
+} */
 
 /* Larger image on desktop */
-@media (min-width: 768px) {
+/* @media (min-width: 768px) {
   .modal-product-img {
     max-height: 380px;
   }
-}
+} */
 
 /* Size pill */
-.size-pill {
+/* .size-pill {
   padding: 6px 12px;
   background: #eee;
   border-radius: 20px;
   font-size: 14px;
   cursor: pointer;
   transition: 0.2s;
-}
+} */
 
-.size-pill:hover {
+/* .size-pill:hover {
   background: #ddd;
-}
+} */
 
 /* Add responsive button groups/layout */
-.modal-actions {
+/* .modal-actions {
   display: flex;
   flex-direction: column;
   gap: 12px;
-}
-
+} */
+/* 
 @media (min-width: 600px) {
   .modal-actions {
     flex-direction: row;
   }
-}
-
-/*  */
-
-.custom-badge {
-  border-radius: 5px !important;
-}
+} */

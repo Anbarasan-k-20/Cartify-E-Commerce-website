@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Alert from "@mui/material/Alert";
-
-import { GiFallDown } from "react-icons/gi";
+import axios from "axios";
 
 const CreateAccount = () => {
   const [alertMsg, setAlertMsg] = useState(false);
@@ -16,6 +15,17 @@ const CreateAccount = () => {
 
   let handlechange = (e) => {
     let { name, value } = e.target;
+    if (name === "phone") {
+      value = value.replace(/\D/g, ""); // accept only digits
+    }
+
+    if (name === "email") {
+      value = value.trim(); // no spaces inside email
+    }
+
+    if (name === "fullname") {
+      value = value.replace(/[^a-zA-Z ]/g, ""); // allow only letters & spaces
+    }
 
     setCreate({
       ...create,
@@ -23,9 +33,10 @@ const CreateAccount = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Frontend validation
     if (
       !create.fullname ||
       !create.phone ||
@@ -37,25 +48,48 @@ const CreateAccount = () => {
       return;
     }
 
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+    if (!emailRegex.test(create.email)) {
+      alert("Enter a valid email address (e.g., user@mail.com)");
+      return;
+    }
+
     if (create.password !== create.confirmpassword) {
       alert("Passwords do not match");
       return;
     }
 
-    console.log("Account created:", create);
-    setAlertMsg(true);
+    try {
+      const res = await axios.post(
+        "http://localhost:3000/api/v1/auth/register",
+        {
+          fullname: create.fullname,
+          phone: create.phone,
+          email: create.email,
+          password: create.password,
+        }
+      );
 
-    setCreate({
-      fullname: "",
-      phone: "",
-      email: "",
-      password: "",
-      confirmpassword: "",
-    });
+      console.log("API RESPONSE:", res.data);
+      setAlertMsg(true);
 
-    setTimeout(() => {
-      setAlertMsg(false);
-    }, 3000);
+      setCreate({
+        fullname: "",
+        phone: "",
+        email: "",
+        password: "",
+        confirmpassword: "",
+      });
+
+      setTimeout(() => setAlertMsg(false), 3000);
+    } catch (error) {
+      if (error.response) {
+        alert(error.response.data.message);
+      } else {
+        alert("Something went wrong");
+      }
+    }
   };
 
   const navigate = useNavigate();
@@ -91,7 +125,11 @@ const CreateAccount = () => {
                 value={create.phone}
                 name="phone"
                 onChange={handlechange}
-                type="number"
+                type="tel"
+                pattern="^[0-9]{10}$"
+                inputMode="numeric"
+                required
+                maxLength={10}
               />
               <label className="form-label my-2">E-mail</label>
               <input
@@ -100,6 +138,7 @@ const CreateAccount = () => {
                 name="email"
                 onChange={handlechange}
                 type="email"
+                required
               />
               <label className="form-label my-2">Password</label>
               <input

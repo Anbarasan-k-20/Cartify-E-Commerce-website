@@ -7,6 +7,7 @@ import Products from "./components/Products";
 import CreateAccount from "./pages/CreateAccount";
 import Cart from "./components/Cart";
 import "../src/App.css";
+import ProductDetailPage from "./components/ProductDetailPage";
 const App = () => {
   return (
     <>
@@ -19,6 +20,7 @@ const App = () => {
           <Route path={"/createaccount"} element={<CreateAccount />} />
           <Route path={"/addproducts"} element={<AddProduct />} />
           <Route path={"/cart"} element={<Cart />} />
+          <Route path="/product/:id" element={<ProductDetailPage />} />
         </Routes>
       </BrowserRouter>
     </>

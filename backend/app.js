@@ -1,28 +1,26 @@
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
+
 import router from "./routes/productsRoutes.js";
 import categoryRoutes from "./routes/categoryRoutes.js";
 import cartRoute from "./routes/cartRoute.js";
-import { connectDB } from "./db.js";
+import authRoutes from "./routes/authRoutes.js";
 
-// import errorHandling from "./middleware/errorHandling.js";
+import { connectDB } from "./db.js";
 
 const app = express();
 
 dotenv.config();
 
-// global  Middleware
-
+// global Middleware
 app.use(cors());
 app.use(express.json());
 
-// Connect to Database
-
+// Connect to DB
 connectDB();
 
-// Routes
-
+// Default route
 app.get("/", (req, res) => {
   res.json({
     success: true,
@@ -34,6 +32,7 @@ app.get("/", (req, res) => {
 app.use("/api/v1", router);
 app.use("/api/v1/categories", categoryRoutes);
 app.use("/api/v1/cart", cartRoute);
+app.use("/api/v1/auth", authRoutes);
 
 const PORT = process.env.PORT;
 

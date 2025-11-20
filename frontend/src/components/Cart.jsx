@@ -7,7 +7,7 @@ import {
   removeFromCartDB,
   increaseQtyDB,
   decreaseQtyDB,
-} from "../store/cartSliderReducer"; // <- adjust path if needed
+} from "../store/cartSliderReducer";
 
 export default function Cart() {
   const dispatch = useDispatch();
@@ -147,7 +147,9 @@ export default function Cart() {
             <div className="col-12 col-md-2 text-center text-md-end mt-3 mt-md-0">
               {/* show total price based on quantity */}
               <h5 className="fw-bold">
-                ₹{(item.price * (item.quantity || 1)).toFixed(2)}
+                {(
+                  (item.discountPrice ?? item.price) * (item.quantity || 1)
+                ).toFixed(2)}
               </h5>
             </div>
           </div>

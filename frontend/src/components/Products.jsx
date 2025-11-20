@@ -7,36 +7,24 @@ import { GiShoppingCart } from "react-icons/gi";
 import { Atom } from "react-loading-indicators";
 import { useDispatch } from "react-redux";
 import { addToCartDB } from "../store/cartSliderReducer";
-import ProductDetailModal from "../components/ProductDetailModal";
-
 import Alert from "@mui/material/Alert";
 import CheckIcon from "@mui/icons-material/Check";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const Products = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const { products, loading, isError } = useFetch(
     "http://localhost:3000/api/v1/products"
   );
 
   const [successMessage, setSuccessMessage] = useState("");
-  const [selectedProduct, setSelectedProduct] = useState(null);
 
-  const openProductModal = (product) => {
-    setSelectedProduct(product);
-  };
-
-  const closeProductModal = () => {
-    setSelectedProduct(null);
-  };
-
-  // GLOBAL ADD TO CART FUNCTION
   const handleCart = async (product) => {
-    console.log(product);
-
     try {
+      // const result = await dispatch(addToCartDB(product)).unwrap();
       await dispatch(addToCartDB(product)).unwrap();
-      // await dispatch(addToCartDB(product._id));
       setSuccessMessage(`${product.title} added to cart successfully!`);
       setTimeout(() => setSuccessMessage(""), 3000);
     } catch (err) {
@@ -45,6 +33,16 @@ const Products = () => {
     }
   };
 
+  // GET SEARCH QUERY
+  const location = useLocation();
+  const params = new URLSearchParams(location.search);
+  const searchQuery = params.get("search")?.toLowerCase() || "";
+  
+  // FILTER products by search query
+  const filteredProducts = products.filter((p) =>
+    p.title.toLowerCase().includes(searchQuery)
+  );
+  
   if (loading) {
     return (
       <div className="d-flex justify-content-center align-items-center vh-100">
@@ -53,9 +51,10 @@ const Products = () => {
     );
   }
 
+
   return (
     <div className="container mt-4">
-      <h2 className="mb-4">Products ({products?.length || 0})</h2>
+      <h2 className="mb-4">Products ({filteredProducts.length})</h2>
 
       {successMessage && (
         <div className="mb-3">
@@ -66,15 +65,15 @@ const Products = () => {
       )}
 
       <div className="row">
-        {products?.map((product, index) => (
+        {filteredProducts.map((product, index) => (
           <div className="col-md-4 mb-4" key={index}>
+            {/* PRODUCT CARD OPENS A NEW PAGE */}
             <Card
               className="h-100 shadow-sm text-center product-card"
-              onClick={() => openProductModal(product)}
+              onClick={() => navigate(`/product/${product._id}`)} // <-- redirect
               style={{ cursor: "pointer" }}
             >
               <div className="product-card position-relative">
-                {/* Badge appears in top-left */}
                 {product.stock < 10 && (
                   <span
                     className="badge bg-danger px-2 py-1 position-absolute custom-badge"
@@ -83,9 +82,8 @@ const Products = () => {
                     Only {product.stock} left!
                   </span>
                 )}
-
-                {/* Product content here */}
               </div>
+
               <Card.Img
                 variant="top"
                 src={product.image}
@@ -96,10 +94,20 @@ const Products = () => {
               <Card.Body>
                 <Card.Title>{product.title}</Card.Title>
 
-                <Card.Text>
-                  <strong>₹{product.price}</strong>
-                </Card.Text>
+                <div>
+                  <Card.Text>
+                    <span
+                      style={{ textDecoration: "line-through", color: "#888" }}
+                    >
+                      MRP ₹{product.price}
+                    </span>
+                  </Card.Text>
+                  <Card.Text className="mb-3">
+                    <strong>₹Discount Price {product.discountPrice}</strong>
+                  </Card.Text>
+                </div>
 
+                {/* Description clamps to 2 lines */}
                 <Card.Text
                   style={{
                     display: "-webkit-box",
@@ -112,6 +120,7 @@ const Products = () => {
                   {product.description}
                 </Card.Text>
 
+                {/* ADD TO CART BUTTON */}
                 <div className="d-flex justify-content-end">
                   <Button
                     onClick={(e) => {
@@ -136,16 +145,6 @@ const Products = () => {
           </p>
         )}
       </div>
-
-      {selectedProduct && (
-        <ProductDetailModal
-          product={selectedProduct}
-          onClose={closeProductModal}
-          // 🔧 FIX APPLIED: pass product into handler
-          onAddToCart={(product) => handleCart(product)}
-          onBuyNow={(product) => alert(`Buy Now clicked for: ${product.title}`)}
-        />
-      )}
     </div>
   );
 };

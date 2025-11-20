@@ -1,4 +1,3 @@
-// store/cartSlicerReducer.jsx
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
@@ -10,25 +9,6 @@ export const fetchCart = createAsyncThunk("cart/fetchCart", async () => {
   return res.data.data;
 });
 
-// export const addToCartDB = createAsyncThunk(
-//   "cart/addToCartDB",
-//   async (product, { rejectWithValue }) => {
-//     try {
-//       const res = await axios.post(API_URL, {
-//         productId: product._id,
-//         title: product.title,
-//         price: product.price,
-//         image: product.image,
-//         category: product.category,
-//         rating: product.rating,
-//       });
-//       return res.data.data;
-//     } catch (err) {
-//       return rejectWithValue(err.response?.data?.message || "Add failed");
-//     }
-//   }
-// );
-
 export const addToCartDB = createAsyncThunk(
   "cart/addToCartDB",
   async (product, { rejectWithValue }) => {
@@ -37,6 +17,7 @@ export const addToCartDB = createAsyncThunk(
         productId: product._id,
         title: product.title,
         price: product.price,
+        discountPrice: product.discountPrice,
         description: product.description,
         category: product.category,
         image: product.image,
@@ -99,7 +80,6 @@ const cartSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
-
       // FETCH
       .addCase(fetchCart.pending, (state) => {
         state.loading = true;
@@ -113,27 +93,17 @@ const cartSlice = createSlice({
         state.error = action.error.message;
       })
 
-      // ADD — replace existing OR add new
+      // ADD
       .addCase(addToCartDB.fulfilled, (state, action) => {
         const newItem = action.payload;
-
-        // const index = state.cart.findIndex(
-        //   (i) => i.productId === newItem.productId
-        // );
-
         const index = state.cart.findIndex(
-          (i) =>
-            i.productId === newItem.productId ||
-            i.productId?._id === newItem.productId ||
-            i.productId === newItem.productId?._id ||
-            i.productId?._id === newItem.productId?._id
+          (item) =>
+            item.productId === newItem.productId || item._id === newItem._id
         );
 
         if (index !== -1) {
-          // Replace existing item with updated one from backend
           state.cart[index] = newItem;
         } else {
-          // Add new product
           state.cart.push(newItem);
         }
       })
@@ -160,7 +130,5 @@ const cartSlice = createSlice({
 });
 
 export default cartSlice.reducer;
-
-// CART ICON COUNT
 export const selectCartCount = (state) =>
   state.cart.cart.reduce((sum, item) => sum + item.quantity, 0);

@@ -1,18 +1,21 @@
 # Dependencies
 node_modules/
-frontend/node_modules/
-backend/node_modules/
 
-# Build folders
+# Build output
 dist/
 build/
 
 # Environment files
 .env
-backend/config.env/.env
+.env.*    # env.local, env.production, etc.
 
 # Logs
 *.log
 
-# VS Code settings
+# Editor/IDE
 .vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db

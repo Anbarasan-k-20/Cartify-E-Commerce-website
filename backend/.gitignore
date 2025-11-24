@@ -15,6 +15,28 @@ build/
 # OS-specific
 .DS_Store
 Thumbs.db
+# Node Modules
+node_modules/
+
+# Environment files
+.env
+.env.*     # variations like .env.dev, .env.local
+
+# Logs
+*.log
+logs/
+
+# Build
+dist/
+build/
+
+# Editor/IDE
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
 
 # IDE-specific
 .vscode/

@@ -11,107 +11,49 @@
 .custom-badge {
   border-radius: 7px !important;
 }
+/* Container */
+.product-detail-container {
+  padding-bottom: 50px;
+}
 
-/* * Overlay */
-/* .modal-overlay {
-  position: fixed;
-  inset: 0;
-  backdrop-filter: blur(4px);
-  background: rgba(0, 0, 0, 0.4);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 16px; 
-  z-index: 2000;
-} */
-
-/* Modal container */
-/* .modal-card {
-  background: #fff;
+/* Image Box with Hover Zoom */
+.image-zoom-box {
   width: 100%;
-  max-width: 900px;
-  padding: 20px;
-  border-radius: 12px;
-  position: relative;
-  animation: zoomIn 0.25s ease;
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 20px;
-} */
+  max-width: 400px;
+  overflow: hidden;
+  border-radius: 10px;
+  cursor: zoom-in;
+}
 
-/* Desktop layout (split view) */
-/* @media (min-width: 768px) {
-  .modal-card {
-    grid-template-columns: 1fr 1fr;
-    padding: 30px;
-  }
-} */
-
-/* Animation */
-/* @keyframes zoomIn {
-  from {
-    transform: scale(0.8);
-    opacity: 0;
-  }
-  to {
-    transform: scale(1);
-    opacity: 1;
-  }
-} */
-
-/* Close button */
-/* .modal-close-btn {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  background: black;
-  color: white;
-  border: none;
-  border-radius: 50%;
-  width: 34px;
-  height: 34px;
-  font-size: 18px;
-  cursor: pointer;
-} */
-
-/* Product Image */
-/* .modal-product-img {
+.detail-product-image {
   width: 100%;
   height: auto;
-  max-height: 300px;
   object-fit: contain;
-} */
+  transition: transform 0.3s ease;
+}
 
-/* Larger image on desktop */
-/* @media (min-width: 768px) {
-  .modal-product-img {
-    max-height: 380px;
-  }
-} */
+/* Hover Zoom Effect */
+.image-zoom-box:hover .detail-product-image {
+  transform: scale(1.4);
+}
 
-/* Size pill */
-/* .size-pill {
-  padding: 6px 12px;
-  background: #eee;
-  border-radius: 20px;
-  font-size: 14px;
-  cursor: pointer;
-  transition: 0.2s;
-} */
+/* Product Title */
+.product-title {
+  font-weight: 600;
+  margin-bottom: 10px;
+}
 
-/* .size-pill:hover {
-  background: #ddd;
-} */
+/* Price Section */
+.price-section {
+  margin-bottom: 15px;
+}
 
-/* Add responsive button groups/layout */
-/* .modal-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-} */
-/* 
-@media (min-width: 600px) {
-  .modal-actions {
-    flex-direction: row;
-  }
-} */
+.old-price {
+  font-size: 1rem;
+}
+
+.new-price {
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+

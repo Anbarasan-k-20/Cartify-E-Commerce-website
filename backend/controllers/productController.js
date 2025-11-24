@@ -105,3 +105,83 @@ export const createProduct = async (req, res) => {
     });
   }
 };
+
+// upload Product details as collection
+
+export const importProductsJSON = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res
+        .status(400)
+        .json({ success: false, message: "No JSON file uploaded" });
+    }
+
+    const fileContent = req.file.buffer.toString("utf-8");
+    const productsArray = JSON.parse(fileContent);
+
+    if (!Array.isArray(productsArray)) {
+      return res.status(400).json({
+        success: false,
+        message: "JSON must be an array of products",
+      });
+    }
+
+    const finalProducts = [];
+
+    for (let item of productsArray) {
+      if (
+        !item.title ||
+        !item.price ||
+        !item.description ||
+        !item.category ||
+        !item.image
+      ) {
+        console.log("Skipping invalid product:", item);
+        continue;
+      }
+
+      let existingCategory = await Category.findOne({ name: item.category });
+
+      if (!existingCategory) {
+        existingCategory = await Category.create({ name: item.category });
+      }
+
+      finalProducts.push({
+        title: item.title,
+        price: item.price,
+        discountPrice: item.discountPrice || 0,
+        description: item.description,
+        category: existingCategory.name,
+        brand: item.brand || "",
+        stock: item.stock || 0,
+        sizes: item.sizes || [],
+        rating: {
+          rate: item.rating?.rate || 0,
+          count: item.rating?.count || 0,
+        },
+        image: item.image, // URL already provided
+      });
+    }
+
+    if (finalProducts.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "No valid products found in JSON",
+      });
+    }
+
+    const createdProducts = await Product.insertMany(finalProducts);
+
+    res.status(201).json({
+      success: true,
+      message: `${createdProducts.length} products imported successfully`,
+    });
+  } catch (error) {
+    console.error("Import JSON Error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error importing products",
+      error: error.message,
+    });
+  }
+};

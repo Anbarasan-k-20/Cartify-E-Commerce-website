@@ -1,3 +1,5 @@
+//D:\E Commerce Website\backend\routes\categoryRoutes.js
+
 import express from "express";
 import {
   getAllCategories,

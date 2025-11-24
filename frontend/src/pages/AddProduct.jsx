@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import Alert from "@mui/material/Alert";
 import axios from "axios";
 
+const API = import.meta.env.VITE_API_BASE_URL;
+
 const sizeOptions = ["S", "M", "L", "XL", "XXL"];
 
 const AddProduct = () => {
@@ -24,13 +26,15 @@ const AddProduct = () => {
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState([]);
   const [newCategory, setNewCategory] = useState("");
+  // Upload as Product Json
+  const [jsonFile, setJsonFile] = useState(null);
   useEffect(() => {
     fetchCategories();
   }, []);
 
   const fetchCategories = async () => {
     try {
-      const res = await axios.get("http://localhost:3000/api/v1/categories");
+      const res = await axios.get(`${API}/categories`);
       if (res.data.success) setCategories(res.data.data);
     } catch (error) {
       console.error("Error fetching categories:", error);
@@ -40,7 +44,7 @@ const AddProduct = () => {
   const handleAddCategory = async () => {
     if (!newCategory.trim()) return alert("Enter a category name");
     try {
-      const res = await axios.post("http://localhost:3000/api/v1/categories", {
+      const res = await axios.post(`${API}/categories`, {
         name: newCategory,
       });
       if (res.data.success) {
@@ -66,6 +70,35 @@ const AddProduct = () => {
       setValues({ ...values, [name]: value });
     }
   };
+
+  // handle Json Upload
+
+  const handleJsonUpload = (e) => {
+  setJsonFile(e.target.files[0]);
+};
+
+const handleImportSubmit = async () => {
+  if (!jsonFile) {
+    alert("Upload a JSON file first");
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("file", jsonFile);
+
+  try {
+    const res = await axios.post(
+      "http://localhost:5000/api/v1/products/import-json",
+      formData,
+      { headers: { "Content-Type": "multipart/form-data" } }
+    );
+
+    alert(res.data.message);
+  } catch (err) {
+    alert("Error: " + err.message);
+  }
+};
+
 
   const toggleSize = (size) => {
     setValues((prev) => {
@@ -111,11 +144,9 @@ const AddProduct = () => {
 
     setLoading(true);
     try {
-      const res = await axios.post(
-        "http://localhost:3000/api/v1/createProducts",
-        formData,
-        { headers: { "Content-Type": "multipart/form-data" } }
-      );
+      const res = await axios.post(`${API}/createProducts`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
 
       if (res.data.success) {
         setSuccess(true);
@@ -347,6 +378,21 @@ const AddProduct = () => {
           >
             <IoMdAdd className="me-2" />
             {loading ? "Adding..." : "Add Product"}
+          </button>
+        </div>
+        <hr />
+        {/* handle The upload products as json */}
+        <div>
+          <p>Import Collection of Products ( Only accetps Json) </p>
+          <input
+            type="file"
+            accept="application/json"
+            onChange={handleJsonUpload}
+            className="form-control my-3"
+          />
+
+          <button className="btn btn-dark" onClick={handleImportSubmit}>
+            Import Products
           </button>
         </div>
       </div>

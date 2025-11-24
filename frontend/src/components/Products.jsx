@@ -1,48 +1,44 @@
 // Product.jsx
-import { useState } from "react";
-import Button from "react-bootstrap/Button";
+
 import Card from "react-bootstrap/Card";
 import useFetch from "./customHook/useFetch";
-import { GiShoppingCart } from "react-icons/gi";
+
 import { Atom } from "react-loading-indicators";
-import { useDispatch } from "react-redux";
-import { addToCartDB } from "../store/cartSliderReducer";
-import Alert from "@mui/material/Alert";
-import CheckIcon from "@mui/icons-material/Check";
+
 import { useNavigate, useLocation } from "react-router-dom";
 
+const API = import.meta.env.VITE_API_BASE_URL;
+
 const Products = () => {
-  const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const { products, loading, isError } = useFetch(
-    "http://localhost:3000/api/v1/products"
-  );
-
-  const [successMessage, setSuccessMessage] = useState("");
-
-  const handleCart = async (product) => {
-    try {
-      // const result = await dispatch(addToCartDB(product)).unwrap();
-      await dispatch(addToCartDB(product)).unwrap();
-      setSuccessMessage(`${product.title} added to cart successfully!`);
-      setTimeout(() => setSuccessMessage(""), 3000);
-    } catch (err) {
-      console.error("Failed to add to cart:", err);
-      setSuccessMessage("");
-    }
-  };
+  const { products, loading, isError } = useFetch(`${API}/products`);
 
   // GET SEARCH QUERY
   const location = useLocation();
   const params = new URLSearchParams(location.search);
   const searchQuery = params.get("search")?.toLowerCase() || "";
-  
+
   // FILTER products by search query
-  const filteredProducts = products.filter((p) =>
-    p.title.toLowerCase().includes(searchQuery)
+  const filteredProducts = products.filter(
+    (p) =>
+      p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      p.category.toLowerCase().includes(searchQuery.toLowerCase())
   );
-  
+
+  // const q = searchQuery.toLowerCase();
+
+  // const filteredProducts = products.filter((p) => {
+  //   const title = p.title.toLowerCase();
+  //   const category = p.category.toLowerCase();
+  //   return (
+  //     title.startsWith(q) ||
+  //     category.startsWith(q) ||
+  //     title.includes(q + " ") ||
+  //     category.includes(q + " ")
+  //   );
+  // });
+
   if (loading) {
     return (
       <div className="d-flex justify-content-center align-items-center vh-100">
@@ -50,20 +46,9 @@ const Products = () => {
       </div>
     );
   }
-
-
   return (
     <div className="container mt-4">
-      <h2 className="mb-4">Products ({filteredProducts.length})</h2>
-
-      {successMessage && (
-        <div className="mb-3">
-          <Alert icon={<CheckIcon fontSize="inherit" />} severity="success">
-            {successMessage}
-          </Alert>
-        </div>
-      )}
-
+      {/* <h2 className="mb-4">Products ({filteredProducts.length})</h2> */}
       <div className="row">
         {filteredProducts.map((product, index) => (
           <div className="col-md-4 mb-4" key={index}>
@@ -83,17 +68,14 @@ const Products = () => {
                   </span>
                 )}
               </div>
-
               <Card.Img
                 variant="top"
                 src={product.image}
                 alt={product.title}
                 style={{ height: "300px", objectFit: "contain" }}
               />
-
               <Card.Body>
                 <Card.Title>{product.title}</Card.Title>
-
                 <div>
                   <Card.Text>
                     <span
@@ -106,7 +88,6 @@ const Products = () => {
                     <strong>₹Discount Price {product.discountPrice}</strong>
                   </Card.Text>
                 </div>
-
                 {/* Description clamps to 2 lines */}
                 <Card.Text
                   style={{
@@ -119,21 +100,6 @@ const Products = () => {
                 >
                   {product.description}
                 </Card.Text>
-
-                {/* ADD TO CART BUTTON */}
-                <div className="d-flex justify-content-end">
-                  <Button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleCart(product);
-                    }}
-                    variant="dark"
-                    className="d-flex gap-2 align-items-center"
-                  >
-                    <GiShoppingCart />
-                    Add to Cart
-                  </Button>
-                </div>
               </Card.Body>
             </Card>
           </div>

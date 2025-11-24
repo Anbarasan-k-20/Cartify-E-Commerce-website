@@ -1,3 +1,5 @@
+
+//D:\E Commerce Website\backend\controllers\categoryController.js
 import Category from "../models/Category.js";
 export const getAllCategories = async (req, res) => {
   try {

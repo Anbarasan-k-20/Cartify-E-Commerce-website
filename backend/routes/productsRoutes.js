@@ -1,5 +1,6 @@
 //productRoutes.js
 import express from "express";
+import { importProductsJSON } from "../controllers/productController.js";
 import { upload } from "../middleware/uploadImage.js";
 import {
   getAllProducts,

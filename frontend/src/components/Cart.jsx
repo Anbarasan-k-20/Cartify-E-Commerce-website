@@ -1,5 +1,5 @@
 // src/components/Cart.jsx
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Alert from "@mui/material/Alert";
 import {

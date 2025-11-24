@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Alert from "@mui/material/Alert";
 import axios from "axios";
+const API = import.meta.env.VITE_API_BASE_URL;
 
 const CreateAccount = () => {
   const [alertMsg, setAlertMsg] = useState(false);
@@ -61,15 +62,12 @@ const CreateAccount = () => {
     }
 
     try {
-      const res = await axios.post(
-        "http://localhost:3000/api/v1/auth/register",
-        {
-          fullname: create.fullname,
-          phone: create.phone,
-          email: create.email,
-          password: create.password,
-        }
-      );
+      const res = await axios.post(`${API}/auth/register`, {
+        fullname: create.fullname,
+        phone: create.phone,
+        email: create.email,
+        password: create.password,
+      });
 
       console.log("API RESPONSE:", res.data);
       setAlertMsg(true);

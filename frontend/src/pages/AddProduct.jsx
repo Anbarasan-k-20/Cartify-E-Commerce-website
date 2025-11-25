@@ -1,3 +1,5 @@
+//D:\E Commerce Website\frontend\src\pages\AddProduct.jsx
+
 import { MdOutlineAddShoppingCart } from "react-icons/md";
 import { IoMdAdd } from "react-icons/io";
 import { useState, useEffect } from "react";
@@ -74,32 +76,55 @@ const AddProduct = () => {
   // handle Json Upload
 
   const handleJsonUpload = (e) => {
-  setJsonFile(e.target.files[0]);
-};
+    setJsonFile(e.target.files[0]);
+  };
+  //---
+  const handleImportSubmit = async () => {
+    if (!jsonFile) {
+      alert("Upload a JSON file first");
+      return;
+    }
 
-const handleImportSubmit = async () => {
-  if (!jsonFile) {
-    alert("Upload a JSON file first");
-    return;
-  }
+    // Validate file type
+    if (jsonFile.type !== "application/json") {
+      alert("Please upload a valid JSON file");
+      return;
+    }
 
-  const formData = new FormData();
-  formData.append("file", jsonFile);
+    const formData = new FormData();
+    formData.append("file", jsonFile);
 
-  try {
-    const res = await axios.post(
-      "http://localhost:5000/api/v1/products/import-json",
-      formData,
-      { headers: { "Content-Type": "multipart/form-data" } }
-    );
+    setLoading(true);
+    try {
+      const res = await axios.post(`${API}/products/import-json`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
 
-    alert(res.data.message);
-  } catch (err) {
-    alert("Error: " + err.message);
-  }
-};
+      alert(res.data.message);
+      setJsonFile(null);
 
+      // Optional: Clear file input
+      const fileInput = document.querySelector('input[type="file"]');
+      if (fileInput) fileInput.value = "";
+    } catch (err) {
+      console.error("Full error:", err);
+      console.error("Error response:", err.response?.data);
 
+      // More specific error messages
+      if (err.response?.data?.message) {
+        alert("Import failed: " + err.response.data.message);
+      } else if (err.response?.status === 400) {
+        alert("Bad Request: Please check your JSON file format");
+      } else {
+        alert("Error importing products: " + err.message);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+  
   const toggleSize = (size) => {
     setValues((prev) => {
       const has = prev.sizes.includes(size);
@@ -136,6 +161,7 @@ const handleImportSubmit = async () => {
     if (values.stock !== "") formData.append("stock", values.stock);
     formData.append("rate", values.rating.rate);
     formData.append("count", values.rating.count);
+
     // sizes as JSON string (backend should parse JSON)
     if (values.sizes && values.sizes.length > 0) {
       formData.append("sizes", JSON.stringify(values.sizes));

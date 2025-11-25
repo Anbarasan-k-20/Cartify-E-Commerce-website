@@ -1,4 +1,4 @@
-// controllers/productControllers
+// controllers/productController.js
 import Product from "../models/Product.js";
 import Category from "../models/Category.js";
 import { uploadToCloudinary } from "../middleware/uploadImage.js";
@@ -107,17 +107,17 @@ export const createProduct = async (req, res) => {
 };
 
 // upload Product details as collection
-
 export const importProductsJSON = async (req, res) => {
   try {
     if (!req.file) {
-      return res
-        .status(400)
-        .json({ success: false, message: "No JSON file uploaded" });
+      return res.status(400).json({
+        success: false,
+        message: "No JSON file uploaded",
+      });
     }
 
-    const fileContent = req.file.buffer.toString("utf-8");
-    const productsArray = JSON.parse(fileContent);
+    // Parse JSON
+    const productsArray = JSON.parse(req.file.buffer.toString("utf-8"));
 
     if (!Array.isArray(productsArray)) {
       return res.status(400).json({
@@ -126,9 +126,10 @@ export const importProductsJSON = async (req, res) => {
       });
     }
 
-    const finalProducts = [];
+    const validProducts = [];
 
     for (let item of productsArray) {
+      // Quick validation - only check absolute essentials
       if (
         !item.title ||
         !item.price ||
@@ -136,48 +137,50 @@ export const importProductsJSON = async (req, res) => {
         !item.category ||
         !item.image
       ) {
-        console.log("Skipping invalid product:", item);
-        continue;
+        continue; // Skip invalid products silently
       }
 
-      let existingCategory = await Category.findOne({ name: item.category });
-
-      if (!existingCategory) {
-        existingCategory = await Category.create({ name: item.category });
+      // Find or create category
+      let category = await Category.findOne({ name: item.category });
+      if (!category) {
+        category = await Category.create({ name: item.category });
       }
 
-      finalProducts.push({
-        title: item.title,
-        price: item.price,
-        discountPrice: item.discountPrice || 0,
-        description: item.description,
-        category: existingCategory.name,
-        brand: item.brand || "",
-        stock: item.stock || 0,
-        sizes: item.sizes || [],
+      validProducts.push({
+        title: String(item.title).trim(),
+        price: Number(item.price),
+        description: String(item.description).trim(),
+        category: category.name,
+        image: String(item.image).trim(),
+        brand: item.brand ? String(item.brand).trim() : "",
+        discountPrice: item.discountPrice ? Number(item.discountPrice) : 0,
+        stock: item.stock ? Number(item.stock) : 0,
+        sizes: Array.isArray(item.sizes) ? item.sizes : [],
         rating: {
-          rate: item.rating?.rate || 0,
-          count: item.rating?.count || 0,
+          rate: item.rating?.rate ? Number(item.rating.rate) : 0,
+          count: item.rating?.count ? Number(item.rating.count) : 0,
         },
-        image: item.image, // URL already provided
       });
     }
 
-    if (finalProducts.length === 0) {
+    if (validProducts.length === 0) {
       return res.status(400).json({
         success: false,
-        message: "No valid products found in JSON",
+        message: "No valid products found in JSON file",
       });
     }
 
-    const createdProducts = await Product.insertMany(finalProducts);
+    // FIX: Add error handling for bulk insert
+    const createdProducts = await Product.insertMany(validProducts, { ordered: false });
 
     res.status(201).json({
       success: true,
       message: `${createdProducts.length} products imported successfully`,
+      imported: createdProducts.length,
+      total: productsArray.length,
     });
   } catch (error) {
-    console.error("Import JSON Error:", error);
+    console.error("Import Error:", error);
     res.status(500).json({
       success: false,
       message: "Error importing products",

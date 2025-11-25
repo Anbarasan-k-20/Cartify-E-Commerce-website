@@ -1,3 +1,4 @@
+//D:\E Commerce Website\backend\models\Product.js
 import mongoose from "mongoose";
 const productSchema = new mongoose.Schema(
   {

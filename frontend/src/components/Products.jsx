@@ -48,6 +48,7 @@ const Products = () => {
   }
   return (
     <div className="container mt-4">
+      <h3 className="my-3">Top Deals</h3>
       {/* <h2 className="mb-4">Products ({filteredProducts.length})</h2> */}
       <div className="row">
         {filteredProducts.map((product, index) => (
@@ -88,6 +89,12 @@ const Products = () => {
                     <strong>₹Discount Price {product.discountPrice}</strong>
                   </Card.Text>
                 </div>
+
+                {/* ratings */}
+
+                <Card.Text>
+                  ⭐{product.rating.rate}
+                </Card.Text>
                 {/* Description clamps to 2 lines */}
                 <Card.Text
                   style={{

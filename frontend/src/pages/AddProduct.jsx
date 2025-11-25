@@ -124,7 +124,7 @@ const AddProduct = () => {
       setLoading(false);
     }
   };
-  
+
   const toggleSize = (size) => {
     setValues((prev) => {
       const has = prev.sizes.includes(size);
@@ -409,7 +409,9 @@ const AddProduct = () => {
         <hr />
         {/* handle The upload products as json */}
         <div>
-          <p>Import Collection of Products ( Only accetps Json) </p>
+          <p>
+            <strong>Import Collection of Products (Only JSON) </strong>
+          </p>
           <input
             type="file"
             accept="application/json"

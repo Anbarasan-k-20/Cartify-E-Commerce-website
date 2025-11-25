@@ -82,6 +82,9 @@ const ProductDetailPage = () => {
             <strong>Category:</strong> {product.category}
           </p>
           <p>
+            <strong>Ratings :</strong> ⭐{product.rating.rate}
+          </p>
+          <p>
             <strong>Product ID:</strong> {product._id}
           </p>
 

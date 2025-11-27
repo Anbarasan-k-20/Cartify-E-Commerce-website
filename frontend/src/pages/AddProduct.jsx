@@ -1,12 +1,11 @@
-//D:\E Commerce Website\frontend\src\pages\AddProduct.jsx
-
+// frontend/src/pages/AddProduct.jsx
 import { MdOutlineAddShoppingCart } from "react-icons/md";
 import { IoMdAdd } from "react-icons/io";
 import { useState, useEffect } from "react";
 import Alert from "@mui/material/Alert";
 import axios from "axios";
 
-const API = import.meta.env.VITE_API_BASE_URL;
+const API = import.meta.env.VITE_API_BASE_URL || "";
 
 const sizeOptions = ["S", "M", "L", "XL", "XXL"];
 
@@ -21,15 +20,16 @@ const AddProduct = () => {
     stock: "",
     rating: { rate: "", count: "" },
     image: null,
-    sizes: [], // array of selected sizes
+    sizes: [],
   });
 
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState([]);
   const [newCategory, setNewCategory] = useState("");
-  // Upload as Product Json
-  const [jsonFile, setJsonFile] = useState(null);
+  // import file (JSON or Excel)
+  const [importFile, setImportFile] = useState(null);
+
   useEffect(() => {
     fetchCategories();
   }, []);
@@ -46,9 +46,7 @@ const AddProduct = () => {
   const handleAddCategory = async () => {
     if (!newCategory.trim()) return alert("Enter a category name");
     try {
-      const res = await axios.post(`${API}/categories`, {
-        name: newCategory,
-      });
+      const res = await axios.post(`${API}/categories`, { name: newCategory });
       if (res.data.success) {
         setCategories((prev) => [...prev, res.data.data]);
         setNewCategory("");
@@ -73,53 +71,57 @@ const AddProduct = () => {
     }
   };
 
-  // handle Json Upload
-
-  const handleJsonUpload = (e) => {
-    setJsonFile(e.target.files[0]);
+  // Import file handler (single input supports JSON and Excel)
+  const handleImportFileChange = (e) => {
+    const file = e.target.files[0];
+    setImportFile(file || null);
   };
-  //---
+
   const handleImportSubmit = async () => {
-    if (!jsonFile) {
-      alert("Upload a JSON file first");
+    if (!importFile) {
+      alert("Please choose a JSON or Excel file to import.");
       return;
     }
 
-    // Validate file type
-    if (jsonFile.type !== "application/json") {
-      alert("Please upload a valid JSON file");
+    const lowerName = importFile.name.toLowerCase();
+    let endpoint = null;
+
+    if (lowerName.endsWith(".json")) endpoint = "/products/import-json";
+    else if (lowerName.endsWith(".xls") || lowerName.endsWith(".xlsx"))
+      endpoint = "/products/import-xls";
+    else {
+      alert("Unsupported file type. Use .json, .xls or .xlsx");
       return;
     }
 
     const formData = new FormData();
-    formData.append("file", jsonFile);
-
+    formData.append("file", importFile);
     setLoading(true);
     try {
-      const res = await axios.post(`${API}/products/import-json`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
+      const res = await axios.post(`${API}${endpoint}`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
       });
 
-      alert(res.data.message);
-      setJsonFile(null);
-
-      // Optional: Clear file input
-      const fileInput = document.querySelector('input[type="file"]');
-      if (fileInput) fileInput.value = "";
-    } catch (err) {
-      console.error("Full error:", err);
-      console.error("Error response:", err.response?.data);
-
-      // More specific error messages
-      if (err.response?.data?.message) {
-        alert("Import failed: " + err.response.data.message);
-      } else if (err.response?.status === 400) {
-        alert("Bad Request: Please check your JSON file format");
+      if (res.data && res.data.success) {
+        // show basic success message
+        alert(res.data.message || "Import successful");
+        // reset file input
+        setImportFile(null);
+        const fileInput = document.getElementById("import-file-input");
+        if (fileInput) fileInput.value = "";
       } else {
-        alert("Error importing products: " + err.message);
+        // server responded but flagged issues
+        alert(
+          res.data.message ||
+            "Import completed with issues. Check console for details."
+        );
+        console.log("Import response:", res.data);
       }
+    } catch (err) {
+      console.error("Import error:", err);
+      if (err.response?.data?.message)
+        alert("Import failed: " + err.response.data.message);
+      else alert("Error importing products: " + err.message);
     } finally {
       setLoading(false);
     }
@@ -162,10 +164,8 @@ const AddProduct = () => {
     formData.append("rate", values.rating.rate);
     formData.append("count", values.rating.count);
 
-    // sizes as JSON string (backend should parse JSON)
-    if (values.sizes && values.sizes.length > 0) {
+    if (values.sizes && values.sizes.length > 0)
       formData.append("sizes", JSON.stringify(values.sizes));
-    }
     if (values.image) formData.append("image", values.image);
 
     setLoading(true);
@@ -206,10 +206,7 @@ const AddProduct = () => {
     >
       <div
         className="w-100 shadow-lg p-4 p-md-5 rounded-4"
-        style={{
-          maxWidth: "900px", // Increased width
-          background: "#ffffff",
-        }}
+        style={{ maxWidth: "900px", background: "#ffffff" }}
       >
         {success && (
           <Alert severity="success" className="mb-3">
@@ -221,7 +218,7 @@ const AddProduct = () => {
           <MdOutlineAddShoppingCart /> Add New Product
         </h4>
 
-        {/* ---- Title / Price / Discount ---- */}
+        {/* Title / Price / Discount */}
         <div className="row g-3 mt-2">
           <div className="col-12 col-md-6">
             <label className="form-label my-1">Title *</label>
@@ -257,7 +254,7 @@ const AddProduct = () => {
           </div>
         </div>
 
-        {/* ---- Category / Brand ---- */}
+        {/* Category / Brand */}
         <div className="row g-3 mt-3">
           <div className="col-12 col-md-6">
             <label className="form-label my-1">Category *</label>
@@ -288,7 +285,7 @@ const AddProduct = () => {
           </div>
         </div>
 
-        {/* ---- New Category ---- */}
+        {/* New Category */}
         <div className="mt-3">
           <label className="form-label my-1">
             Create New Category (Optional)
@@ -312,7 +309,7 @@ const AddProduct = () => {
           </div>
         </div>
 
-        {/* ---- Description ---- */}
+        {/* Description */}
         <div className="mt-3">
           <label className="form-label my-1">Description *</label>
           <textarea
@@ -324,7 +321,7 @@ const AddProduct = () => {
           />
         </div>
 
-        {/* ---- Stock / Rating / Count / Image ---- */}
+        {/* Stock / Rating / Count / Image */}
         <div className="row g-3 mt-3">
           <div className="col-6 col-md-3">
             <label className="form-label my-1">Stock</label>
@@ -363,17 +360,20 @@ const AddProduct = () => {
           </div>
 
           <div className="col-6 col-md-3">
-            <label className="form-label my-1">Product Image</label>
+            <label className="form-label my-1">
+              Product Image
+            </label>
             <input
               type="file"
               name="image"
               onChange={handleChange}
               className="form-control"
             />
+            <small className="text-muted"></small>
           </div>
         </div>
 
-        {/* ---- Sizes ---- */}
+        {/* Sizes */}
         <div className="my-3">
           <label className="form-label fw-semibold">Sizes (optional)</label>
           <div className="d-flex gap-2 flex-wrap">
@@ -395,7 +395,7 @@ const AddProduct = () => {
           </div>
         </div>
 
-        {/* ---- Submit ---- */}
+        {/* Submit single product */}
         <div className="d-flex justify-content-end mt-4">
           <button
             onClick={handleSubmit}
@@ -407,21 +407,33 @@ const AddProduct = () => {
           </button>
         </div>
         <hr />
-        {/* handle The upload products as json */}
+
+        {/* Bulk Import */}
         <div>
           <p>
-            <strong>Import Collection of Products (Only JSON) </strong>
+            <strong>Import Collection of Products(JSON / Excel)</strong>
           </p>
           <input
+            id="import-file-input"
             type="file"
-            accept="application/json"
-            onChange={handleJsonUpload}
+            accept=".json,.xls,.xlsx,application/json,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            onChange={handleImportFileChange}
             className="form-control my-3"
           />
-
-          <button className="btn btn-dark" onClick={handleImportSubmit}>
-            Import Products
-          </button>
+          <div className="">
+            {/* d-flex gap-2 align-items-center */}
+            <button
+              className="btn btn-dark"
+              onClick={handleImportSubmit}
+              disabled={loading}
+            >
+              {loading ? "Importing..." : "Import Products"}
+            </button>
+            <p className="text-muted my-2 text-wrap d-block">
+              Excel columns:
+              title,price,description,category,image,brand,discountPrice,stock,sizes,rate,count
+            </p>
+          </div>
         </div>
       </div>
     </div>

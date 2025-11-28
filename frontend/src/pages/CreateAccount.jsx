@@ -2,10 +2,17 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Alert from "@mui/material/Alert";
 import axios from "axios";
+import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
+
 const API = import.meta.env.VITE_API_BASE_URL;
 
 const CreateAccount = () => {
   const [alertMsg, setAlertMsg] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+
+  const [showPass, setShowPass] = useState(false);
+  const [showConfirmPass, setShowConfirmPass] = useState(false);
+
   const [create, setCreate] = useState({
     fullname: "",
     phone: "",
@@ -14,62 +21,51 @@ const CreateAccount = () => {
     confirmpassword: "",
   });
 
-  let handlechange = (e) => {
+  const navigate = useNavigate();
+
+  const handlechange = (e) => {
     let { name, value } = e.target;
-    if (name === "phone") {
-      value = value.replace(/\D/g, ""); // accept only digits
-    }
 
-    if (name === "email") {
-      value = value.trim(); // no spaces inside email
-    }
+    if (name === "phone") value = value.replace(/\D/g, "");
+    if (name === "fullname") value = value.replace(/[^a-zA-Z ]/g, "");
 
-    if (name === "fullname") {
-      value = value.replace(/[^a-zA-Z ]/g, ""); // allow only letters & spaces
-    }
-
-    setCreate({
-      ...create,
-      [name]: value,
-    });
+    setCreate({ ...create, [name]: value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Frontend validation
-    if (
-      !create.fullname ||
-      !create.phone ||
-      !create.email ||
-      !create.password ||
-      !create.confirmpassword
-    ) {
-      alert("Please fill all fields");
+    if (Object.values(create).some((field) => !field)) {
+      setErrorMsg("All fields are required.");
       return;
     }
 
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!/^[0-9]{10}$/.test(create.phone)) {
+      setErrorMsg("Phone number must be exactly 10 digits.");
+      return;
+    }
 
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(create.email)) {
-      alert("Enter a valid email address (e.g., user@mail.com)");
+      setErrorMsg("Enter a valid email");
       return;
     }
 
     if (create.password !== create.confirmpassword) {
-      alert("Passwords do not match");
+      setErrorMsg("Passwords do not match.");
       return;
     }
 
+    setErrorMsg("");
+
     try {
-      const res = await axios.post(`${API}/auth/register`, {
+      await axios.post(`${API}/auth/register`, {
         fullname: create.fullname,
         phone: create.phone,
         email: create.email,
         password: create.password,
       });
 
-      console.log("API RESPONSE:", res.data);
       setAlertMsg(true);
 
       setCreate({
@@ -80,109 +76,122 @@ const CreateAccount = () => {
         confirmpassword: "",
       });
 
-      setTimeout(() => setAlertMsg(false), 3000);
+      setTimeout(() => {
+        setAlertMsg(false);
+        navigate("/login");
+      }, 2500);
     } catch (error) {
-      if (error.response) {
-        alert(error.response.data.message);
-      } else {
-        alert("Something went wrong");
-      }
+      setErrorMsg(error.response?.data?.message || "Something went wrong.");
     }
   };
 
-  const navigate = useNavigate();
   return (
-    <>
-      <div className="container">
-        {alertMsg && (
-          <Alert severity="success" className="mb-3">
-            Account Created Successfully!
-          </Alert>
-        )}
+    <div className="container">
+      {alertMsg && (
+        <Alert severity="success">Account Created Successfully!</Alert>
+      )}
+      {errorMsg && <Alert severity="error">{errorMsg}</Alert>}
+
+      <div
+        className="d-flex justify-content-center align-items-center my-5"
+        style={{ minHeight: "80vh" }}
+      >
         <div
-          className="d-flex justify-content-center align-items-center my-5"
-          style={{ minHeight: "80vh" }}
+          className="shadow-lg p-4 rounded-4 w-100"
+          style={{ maxWidth: "400px" }}
         >
-          <div
-            className="d-flex flex-column w-100 px-3 shadow-lg py-5 px-4 rounded-4"
-            style={{ maxWidth: "400px" }}
-          >
-            <form>
-              <h4>Create Account</h4>
-              <label className="form-label my-2">Full Name</label>
+          <form onSubmit={handleSubmit}>
+            <h4>Create Account</h4>
+
+            <label className="form-label mt-3">Full Name</label>
+            <input
+              className="form-control"
+              name="fullname"
+              value={create.fullname}
+              onChange={handlechange}
+            />
+
+            <label className="form-label mt-3">Phone Number</label>
+            <input
+              className="form-control"
+              name="phone"
+              maxLength="10"
+              value={create.phone}
+              onChange={handlechange}
+            />
+
+            <label className="form-label mt-3">Email</label>
+            <input
+              className="form-control"
+              name="email"
+              value={create.email}
+              onChange={handlechange}
+              type="email"
+            />
+
+            <label className="form-label mt-3">Password</label>
+            <div className="position-relative">
               <input
                 className="form-control"
-                value={create.fullname}
-                name="fullname"
-                onChange={handlechange}
-                type="text"
-              />
-              <label className="form-label my-2">Phone Number</label>
-              <input
-                className="form-control"
-                value={create.phone}
-                name="phone"
-                onChange={handlechange}
-                type="tel"
-                pattern="^[0-9]{10}$"
-                inputMode="numeric"
-                required
-                maxLength={10}
-              />
-              <label className="form-label my-2">E-mail</label>
-              <input
-                className="form-control"
-                value={create.email}
-                name="email"
-                onChange={handlechange}
-                type="email"
-                required
-              />
-              <label className="form-label my-2">Password</label>
-              <input
-                className="form-control"
-                value={create.password}
+                type={showPass ? "text" : "password"}
                 name="password"
+                value={create.password}
                 onChange={handlechange}
-                type="text"
               />
-              <label className="form-label my-2">Confirm Password</label>
+
+              <span
+                onClick={() => setShowPass(!showPass)}
+                style={{
+                  position: "absolute",
+                  right: "10px",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  cursor: "pointer",
+                }}
+              >
+                {showPass ? <AiOutlineEyeInvisible /> : <AiOutlineEye />}
+              </span>
+            </div>
+
+            <label className="form-label mt-3">Confirm Password</label>
+            <div className="position-relative">
               <input
                 className="form-control"
-                value={create.confirmpassword}
+                type={showConfirmPass ? "text" : "password"}
                 name="confirmpassword"
+                value={create.confirmpassword}
                 onChange={handlechange}
-                type="text"
               />
-              <div className="d-flex justify-content-end">
-                <button
-                  onClick={handleSubmit}
-                  className="btn btn-dark mt-3"
-                  onChange={handlechange}
-                  type="submit"
-                >
-                  Create Account
-                </button>
-              </div>
-            </form>
+
+              <span
+                onClick={() => setShowConfirmPass(!showConfirmPass)}
+                style={{
+                  position: "absolute",
+                  right: "10px",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  cursor: "pointer",
+                }}
+              >
+                {showConfirmPass ? <AiOutlineEyeInvisible /> : <AiOutlineEye />}
+              </span>
+            </div>
+
+            <button className="btn btn-dark mt-4 w-100" type="submit">
+              Create Account
+            </button>
+
             <a
-              style={{
-                textAlign: "center",
-                textDecoration: null,
-                fontSize: "12px",
-                marginTop: "20px",
-              }}
-              type="button"
-              onClick={() => {
-                navigate("/login");
-              }}
+              className="text-center mt-3"
+              style={{ fontSize: "12px", cursor: "pointer" }}
+              onClick={() => navigate("/login")}
             >
-              Already Have An Acoount ?
+              Already Have an Account?
             </a>
-          </div>
+          </form>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

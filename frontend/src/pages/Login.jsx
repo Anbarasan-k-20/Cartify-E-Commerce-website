@@ -1,93 +1,121 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Alert from "@mui/material/Alert";
+import axios from "axios";
+import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
+
+const API = import.meta.env.VITE_API_BASE_URL;
+
 const Login = () => {
-  let navigate = useNavigate(); //  min-vh-100
+  let navigate = useNavigate();
   const [alertMsg, setAlertMsg] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+
+  const [showPassword, setShowPassword] = useState(false);
+
   const [fields, setFields] = useState({
-    uName: "",
+    email: "",
     password: "",
   });
-  let handleChange = (e) => {
-    let { name, value } = e.target;
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
     setFields({ ...fields, [name]: value });
   };
-  let handleSubmit = (e) => {
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!fields.uName || !fields.password) {
+
+    if (!fields.email || !fields.password) {
       alert("Please Fill All The Fields");
       return;
     }
-    console.log(fields);
-    setFields({
-      uName: "",
-      password: "",
-    });
-    setAlertMsg(true);
 
-    setTimeout(() => {
-      setAlertMsg(false);
-    }, 3000);
+    try {
+      const res = await axios.post(`${API}/auth/login`, {
+        email: fields.email,
+        password: fields.password,
+      });
+
+      localStorage.setItem("token", res.data.token);
+      localStorage.setItem("user", JSON.stringify(res.data.user));
+
+      setAlertMsg(true);
+      setErrorMsg("");
+
+      setFields({ email: "", password: "" });
+
+      setTimeout(() => {
+        setAlertMsg(false);
+        navigate("/");
+      }, 1500);
+    } catch (error) {
+      setErrorMsg(error.response?.data?.message || "Login failed");
+    }
   };
-  return (
-    <>
-      <div
-        className="container d-flex justify-content-center align-items-center"
-        style={{ minHeight: "80vh" }}
-      >
-        <form
-          onSubmit={handleSubmit}
-          style={{ maxWidth: "350px", width: "100%" }}
-        >
-          {alertMsg && (
-            <Alert severity="success" className="mb-3">
-              Login Success
-            </Alert>
-          )}
-          <div className="d-flex flex-column shadow-lg py-5 px-4 rounded-4">
-            <h4 className="pb-3">Login Form</h4>
-            <label className="my-2">User Name</label>
-            <input
-              className="form-control my-1"
-              onChange={handleChange}
-              type="text"
-              name="uName"
-              value={fields.uName}
-            />
 
-            <label className="my-2" htmlFor="">
-              Password
-            </label>
+  return (
+    <div
+      className="container d-flex justify-content-center align-items-center"
+      style={{ minHeight: "80vh" }}
+    >
+      <form
+        onSubmit={handleSubmit}
+        style={{ maxWidth: "350px", width: "100%" }}
+      >
+        {alertMsg && <Alert severity="success">Login Successful</Alert>}
+        {errorMsg && <Alert severity="error">{errorMsg}</Alert>}
+
+        <div className="d-flex flex-column shadow-lg py-5 px-4 rounded-4">
+          <h4>Login Form</h4>
+
+          <label className="my-2">Email</label>
+          <input
+            className="form-control"
+            type="email"
+            name="email"
+            onChange={handleChange}
+            value={fields.email}
+          />
+
+          <label className="my-2">Password</label>
+          <div className="position-relative">
             <input
-              className="form-control my-1"
-              onChange={handleChange}
-              type="password"
+              className="form-control"
+              type={showPassword ? "text" : "password"}
               name="password"
               value={fields.password}
+              onChange={handleChange}
             />
-            <div className="d-flex justify-content-end">
-              <button type="submit" className="btn btn-dark mt-3">
-                Login
-              </button>
-            </div>
-            <a
+
+            <span
+              onClick={() => setShowPassword(!showPassword)}
               style={{
-                textAlign: "center",
-                textDecoration: null,
-                fontSize: "12px",
-                marginTop: "10px",
-              }}
-              type="button"
-              onClick={() => {
-                navigate("/createaccount");
+                position: "absolute",
+                right: "10px",
+                top: "50%",
+                transform: "translateY(-50%)",
+                cursor: "pointer",
               }}
             >
-              Don't Have An Account
-            </a>
+              {showPassword ? <AiOutlineEyeInvisible /> : <AiOutlineEye />}
+            </span>
           </div>
-        </form>
-      </div>
-    </>
+
+          <button className="btn btn-dark mt-3" type="submit">
+            Login
+          </button>
+
+          <a
+            className="text-center mt-3"
+            style={{ fontSize: "12px", cursor: "pointer" }}
+            onClick={() => navigate("/createaccount")}
+          >
+            Don't Have An Account?
+          </a>
+        </div>
+      </form>
+    </div>
   );
 };
 

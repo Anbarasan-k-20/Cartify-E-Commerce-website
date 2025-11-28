@@ -4,7 +4,7 @@ const Home = () => {
   return (
     <>
       <div className="container">
-        {/* <Products /> */}
+        <Products />
         <footer>
           <div className="d-flex align-items-center justify-content-center my-5">
             <p>©2025 Cartify ALL Rights Reserved.</p>

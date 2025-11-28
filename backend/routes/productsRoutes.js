@@ -1,4 +1,3 @@
-// backend/routes/productRoutes.js
 import express from "express";
 import { upload } from "../middleware/uploadImage.js";
 import {
@@ -8,19 +7,35 @@ import {
   importProductsJSON,
   importProductsXLS,
 } from "../controllers/productController.js";
+import { protect } from "../middleware/authMiddleware.js";
+import { authorizeRoles } from "../middleware/roleMiddleware.js"; // ✅ new middleware
 
 const router = express.Router();
 
 router.get("/products", getAllProducts);
 router.get("/products/:id", getProductById);
 
-// Single product creation (image upload supported)
-router.post("/createProducts", upload.single("image"), createProduct);
-
-// Bulk import routes (two separate endpoints as requested)
-// - JSON import: POST /products/import-json  (file field name: file)
-// - Excel import: POST /products/import-xls  (file field name: file)
-router.post("/products/import-json", upload.single("file"), importProductsJSON);
-router.post("/products/import-xls", upload.single("file"), importProductsXLS);
+// ✅ Only admin can create/import products
+router.post(
+  "/createProducts",
+  protect,
+  authorizeRoles("admin"),
+  upload.single("image"),
+  createProduct
+);
+router.post(
+  "/products/import-json",
+  protect,
+  authorizeRoles("admin"),
+  upload.single("file"),
+  importProductsJSON
+);
+router.post(
+  "/products/import-xls",
+  protect,
+  authorizeRoles("admin"),
+  upload.single("file"),
+  importProductsXLS
+);
 
 export default router;

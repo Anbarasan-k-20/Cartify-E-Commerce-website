@@ -1,3 +1,4 @@
+//D:\E Commerce Website\backend\models\cartModel.js
 import mongoose from "mongoose";
 
 const cartSchema = new mongoose.Schema(

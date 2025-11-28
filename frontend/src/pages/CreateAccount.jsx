@@ -9,7 +9,6 @@ const API = import.meta.env.VITE_API_BASE_URL;
 const CreateAccount = () => {
   const [alertMsg, setAlertMsg] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
-
   const [showPass, setShowPass] = useState(false);
   const [showConfirmPass, setShowConfirmPass] = useState(false);
 
@@ -19,16 +18,15 @@ const CreateAccount = () => {
     email: "",
     password: "",
     confirmpassword: "",
+    role: "user", // ✅ default role
   });
 
   const navigate = useNavigate();
 
   const handlechange = (e) => {
     let { name, value } = e.target;
-
     if (name === "phone") value = value.replace(/\D/g, "");
     if (name === "fullname") value = value.replace(/[^a-zA-Z ]/g, "");
-
     setCreate({ ...create, [name]: value });
   };
 
@@ -64,16 +62,17 @@ const CreateAccount = () => {
         phone: create.phone,
         email: create.email,
         password: create.password,
+        role: create.role, // ✅ send role to backend
       });
 
       setAlertMsg(true);
-
       setCreate({
         fullname: "",
         phone: "",
         email: "",
         password: "",
         confirmpassword: "",
+        role: "user",
       });
 
       setTimeout(() => {
@@ -138,7 +137,6 @@ const CreateAccount = () => {
                 value={create.password}
                 onChange={handlechange}
               />
-
               <span
                 onClick={() => setShowPass(!showPass)}
                 style={{
@@ -162,7 +160,6 @@ const CreateAccount = () => {
                 value={create.confirmpassword}
                 onChange={handlechange}
               />
-
               <span
                 onClick={() => setShowConfirmPass(!showConfirmPass)}
                 style={{
@@ -175,6 +172,33 @@ const CreateAccount = () => {
               >
                 {showConfirmPass ? <AiOutlineEyeInvisible /> : <AiOutlineEye />}
               </span>
+            </div>
+
+            {/* ✅ Role Selection */}
+            <label className="form-label mt-3">Account Type</label>
+            <div className="d-flex gap-3">
+              <div className="form-check">
+                <input
+                  className="form-check-input"
+                  type="radio"
+                  name="role"
+                  value="user"
+                  checked={create.role === "user"}
+                  onChange={handlechange}
+                />
+                <label className="form-check-label">User</label>
+              </div>
+              <div className="form-check">
+                <input
+                  className="form-check-input"
+                  type="radio"
+                  name="role"
+                  value="admin"
+                  checked={create.role === "admin"}
+                  onChange={handlechange}
+                />
+                <label className="form-check-label">Seller</label>
+              </div>
             </div>
 
             <button className="btn btn-dark mt-4 w-100" type="submit">

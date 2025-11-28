@@ -1,3 +1,4 @@
+//D:\E Commerce Website\backend\controllers\cartList.js
 import cartSchema from "../models/cartModel.js";
 
 export const getCartList = async (req, res) => {

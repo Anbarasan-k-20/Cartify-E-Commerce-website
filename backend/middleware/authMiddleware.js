@@ -1,5 +1,6 @@
+//D:\E Commerce Website\backend\middleware\authMiddleware.js
 import jwt from "jsonwebtoken";
-import User from "../models/User.js";
+import User from "../models/userModel.js";
 
 export const protect = async (req, res, next) => {
   let token;

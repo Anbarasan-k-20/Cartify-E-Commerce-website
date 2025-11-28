@@ -1,4 +1,3 @@
-//D:\E Commerce Website\backend\models\userModel.js
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 
@@ -21,6 +20,7 @@ const userSchema = new mongoose.Schema({
     required: true,
     select: false,
   },
+  role: { type: String, enum: ["user", "admin"], default: "user" }, // ✅ Added role field
 });
 
 // hash only if password changed

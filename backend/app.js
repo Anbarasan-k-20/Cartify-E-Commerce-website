@@ -6,6 +6,7 @@ import router from "./routes/productsRoutes.js";
 import categoryRoutes from "./routes/categoryRoutes.js";
 import cartRoute from "./routes/cartRoute.js";
 import authRoutes from "./routes/authRoutes.js";
+import orderRoutes from "./routes/orderRoutes.js";
 
 import { connectDB } from "./db.js";
 
@@ -33,6 +34,7 @@ app.use("/api/v1", router);
 app.use("/api/v1/categories", categoryRoutes);
 app.use("/api/v1/cart", cartRoute);
 app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/orders", orderRoutes);
 
 const PORT = process.env.PORT;
 

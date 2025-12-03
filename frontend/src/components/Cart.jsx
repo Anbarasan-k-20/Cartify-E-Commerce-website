@@ -1,16 +1,20 @@
 // src/components/Cart.jsx
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import Alert from "@mui/material/Alert";
 import {
   fetchCart,
   removeFromCartDB,
   increaseQtyDB,
   decreaseQtyDB,
-} from "../store/cartSliderReducer";
+} from "../store/cartSlice";
+import { IoBagCheckOutline } from "react-icons/io5";
+// import Button from "@mui/material/Button";
 
 export default function Cart() {
   const dispatch = useDispatch();
+  const navigate =useNavigate()
   const {
     cart = [],
     loading,
@@ -23,6 +27,25 @@ export default function Cart() {
     dispatch(fetchCart());
   }, [dispatch]);
 
+  // ✅ NEW: Handle Buy Now from cart
+  const handleBuyNow = (item) => {
+    // Convert cart item to product format
+    const product = {
+      _id: item.productId,
+      title: item.title,
+      price: item.price,
+      discountPrice: item.discountPrice,
+      description: item.description,
+      category: item.category,
+      image: item.image,
+      rating: item.rating,
+      quantity: item.quantity, // ✅ Include current quantity
+    };
+    // ✅ Pass product data via navigation state
+    navigate("/buyproduct", { state: { product } });
+  };
+
+  // ...existing code...
   const handleDelete = async (id) => {
     try {
       setBusyId(id);
@@ -151,6 +174,13 @@ export default function Cart() {
                   (item.discountPrice ?? item.price) * (item.quantity || 1)
                 ).toFixed(2)}
               </h5>
+              <button
+                onClick={() => handleBuyNow(item)}
+                className="btn btn-success mt-2 btn-fixed"
+              >
+                <IoBagCheckOutline className="me-2" />
+                Buy Now
+              </button>
             </div>
           </div>
         ))

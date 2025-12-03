@@ -25,20 +25,6 @@ const Products = () => {
       p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       p.category.toLowerCase().includes(searchQuery.toLowerCase())
   );
-
-  // const q = searchQuery.toLowerCase();
-
-  // const filteredProducts = products.filter((p) => {
-  //   const title = p.title.toLowerCase();
-  //   const category = p.category.toLowerCase();
-  //   return (
-  //     title.startsWith(q) ||
-  //     category.startsWith(q) ||
-  //     title.includes(q + " ") ||
-  //     category.includes(q + " ")
-  //   );
-  // });
-
   if (loading) {
     return (
       <div className="d-flex justify-content-center align-items-center vh-100">

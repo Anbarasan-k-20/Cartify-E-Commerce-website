@@ -1,21 +1,32 @@
-//D:\E Commerce Website\frontend\src\axiosInstance.js
 import axios from "axios";
 
-const API = import.meta.env.VITE_API_BASE_URL;
-
 const axiosInstance = axios.create({
-  baseURL: API,
+  baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:5000",
+  timeout: 10000,
 });
 
-// add token automatically
-axiosInstance.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
+// Add token to every request
+axiosInstance.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
 
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+// Handle response errors
+axiosInstance.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem("token");
+      window.location.href = "/login";
+    }
+    return Promise.reject(error);
   }
-
-  return config;
-});
+);
 
 export default axiosInstance;

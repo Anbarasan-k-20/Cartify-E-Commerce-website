@@ -1,3 +1,4 @@
+//D:\E Commerce Website\backend\middleware\roleMiddleware.js
 export const authorizeRoles = (...roles) => {
   return (req, res, next) => {
     if (!req.user || !roles.includes(req.user.role)) {

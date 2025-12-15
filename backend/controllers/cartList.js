@@ -1,12 +1,17 @@
-//D:\E Commerce Website\backend\controllers\cartList.js
+// D:\E Commerce Website\backend\controllers\cartList.js
 import cartSchema from "../models/cartModel.js";
+
+// GET CART LIST
+//  FIX: Cart is now fetched ONLY for the logged-in user
+//  REMOVED: extra `.find()` which was redundant and confusing
 
 export const getCartList = async (req, res) => {
   try {
     const carts = await cartSchema
-      .find()
+      .find({ user: req.user._id }) // CHANGED: user-specific cart
       .populate("productId")
       .sort({ createdAt: -1 });
+      
     res.status(200).json({ success: true, data: carts });
   } catch (error) {
     res.status(500).json({
@@ -17,8 +22,13 @@ export const getCartList = async (req, res) => {
   }
 };
 
+//  FIX: Cart item is now unique per (user + product)
+//  REMOVED: global product check (was causing shared carts)
+
 export const addToCart = async (req, res) => {
   try {
+    const userId = req.user._id; // NEW: get user from JWT
+
     const {
       productId,
       title,
@@ -44,7 +54,11 @@ export const addToCart = async (req, res) => {
         .json({ success: false, message: "Missing required fields" });
     }
 
-    const existing = await cartSchema.findOne({ productId });
+    // CHANGED: find cart item by BOTH user and product
+    const existing = await cartSchema.findOne({
+      user: userId,
+      productId,
+    });
 
     if (existing) {
       if (existing.quantity >= 5) {
@@ -52,12 +66,14 @@ export const addToCart = async (req, res) => {
           .status(400)
           .json({ success: false, message: "Max limit reached" });
       }
-      existing.quantity = Math.min(existing.quantity + 1, 5);
+      existing.quantity += 1;
       await existing.save();
       return res.status(200).json({ success: true, data: existing });
     }
 
+    //  CHANGED: save cart item with user reference
     const newItem = await cartSchema.create({
+      user: userId, // NEW: link cart item to user
       productId,
       title,
       price,
@@ -78,9 +94,23 @@ export const addToCart = async (req, res) => {
   }
 };
 
+// DELETE CART ITEM
+// FIX: Only the owner of the cart item can delete it
+// REMOVED: findByIdAndDelete (security hole)
+
 export const deleteCartItem = async (req, res) => {
   try {
-    await cartSchema.findByIdAndDelete(req.params.id);
+    const deleted = await cartSchema.findOneAndDelete({
+      _id: req.params.id,
+      user: req.user._id, // NEW: ownership check
+    });
+
+    if (!deleted) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Item not found" });
+    }
+
     res.status(200).json({ success: true, message: "Item removed" });
   } catch (error) {
     res.status(500).json({
@@ -91,34 +121,52 @@ export const deleteCartItem = async (req, res) => {
   }
 };
 
+// INCREASE QUANTITY
+// FIX: Only owner can modify quantity
+
 export const increaseQty = async (req, res) => {
   try {
-    const item = await cartSchema.findById(req.params.id);
+    const item = await cartSchema.findOne({
+      _id: req.params.id,
+      user: req.user._id, //NEW: ownership enforced
+    });
+
     if (!item) {
       return res.status(404).json({ message: "Item not found" });
     }
     if (item.quantity >= 5) {
       return res.status(400).json({ message: "Max quantity reached" });
     }
+
     item.quantity += 1;
     await item.save();
+
     res.json({ success: true, data: item });
   } catch (err) {
     res.status(500).json({ message: "Error updating qty" });
   }
 };
 
+// DECREASE QUANTITY
+// FIX: Only owner can modify quantity
+
 export const decreaseQty = async (req, res) => {
   try {
-    const item = await cartSchema.findById(req.params.id);
+    const item = await cartSchema.findOne({
+      _id: req.params.id,
+      user: req.user._id, // NEW: ownership enforced
+    });
+
     if (!item) {
       return res.status(404).json({ message: "Item not found" });
     }
     if (item.quantity <= 1) {
       return res.status(400).json({ message: "Min quantity is 1" });
     }
+
     item.quantity -= 1;
     await item.save();
+
     res.json({ success: true, data: item });
   } catch (err) {
     res.status(500).json({ message: "Error updating qty" });

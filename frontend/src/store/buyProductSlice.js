@@ -3,27 +3,6 @@ import axiosInstance from "../axiosInstance";
 
 const API = import.meta.env.VITE_API_BASE_URL;
 
-// export const placeOrder = createAsyncThunk(
-//   "buyProduct/placeOrder",
-//   async (orderData, thunkAPI) => {
-//     try {
-//       const token = localStorage.getItem("token");
-//       if (!token) {
-//         return thunkAPI.rejectWithValue("User not authenticated");
-//       }
-
-//       const res = await axios.post(`${API}/api/v1/orders/place-order`, orderData, {
-//         headers: { Authorization: `Bearer ${token}` },
-//       });
-//       return res.data;
-//     } catch (err) {
-//       return thunkAPI.rejectWithValue(
-//         err.response?.data?.message || "Order placement failed"
-//       );
-//     }
-//   }
-// );
-
 // ✅ LINES 8-24: Replace entire placeOrder thunk
 export const placeOrder = createAsyncThunk(
   "buyProduct/placeOrder",

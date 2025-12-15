@@ -1,10 +1,8 @@
 import axios from "axios";
-
 const axiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:5000",
   timeout: 10000,
 });
-
 // Add token to every request
 axiosInstance.interceptors.request.use(
   (config) => {
@@ -16,7 +14,6 @@ axiosInstance.interceptors.request.use(
   },
   (error) => Promise.reject(error)
 );
-
 // Handle response errors
 axiosInstance.interceptors.response.use(
   (response) => response,
@@ -28,5 +25,4 @@ axiosInstance.interceptors.response.use(
     return Promise.reject(error);
   }
 );
-
 export default axiosInstance;

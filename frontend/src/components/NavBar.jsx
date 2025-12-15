@@ -159,13 +159,12 @@ const NavBar = () => {
               </li>
             )}
 
-
-             {/*   For Dev Purpose*/}
-            <li className="nav-item me-2">
+            {/*   For Dev Purpose*/}
+            {/* <li className="nav-item me-2">
               <Link to="/buyproduct" className="nav-link">
                 BuyProduct
               </Link>
-            </li>
+            </li> */}
             {/*   For Dev Purpose*/}
           </ul>
         </div>

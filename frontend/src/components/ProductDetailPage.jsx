@@ -19,6 +19,7 @@ const ProductDetailPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate(); // ✅ added
 
+  // console.log(id)
   useEffect(() => {
     axios
       .get(`${API}/products/${id}`)
@@ -42,7 +43,6 @@ const ProductDetailPage = () => {
   };
 
   const handleBuyNow = () => {
-
     const token = localStorage.getItem("token");
     
     if (!token) {
@@ -50,7 +50,6 @@ const ProductDetailPage = () => {
       return;
     }
       navigate("/buyproduct", { state: { product } });
-    // navigate("/buyproduct"); // go to cart/checkout if logged in
   };
 
   if (!product)

@@ -28,7 +28,6 @@ const isValidUrl = (value) => {
 
 const normalizeProductObject = async (raw) => {
   if (!raw || typeof raw !== "object") return null;
-
   const title = raw.title ? String(raw.title).trim() : "";
   const price =
     raw.price !== undefined && raw.price !== null ? Number(raw.price) : NaN;

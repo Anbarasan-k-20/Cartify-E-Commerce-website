@@ -27,12 +27,13 @@ export const placeOrder = async (req, res) => {
       codFee,
       totalAmount,
     } = req.body;
+    console.log("AUTH USER:", req.user);
 
     // ✅ Validate required fields
     if (
       !productId ||
       !productTitle ||
-      !productPrice ||
+      productPrice == null || // error 400 bad req
       !firstName ||
       !lastName ||
       !street ||

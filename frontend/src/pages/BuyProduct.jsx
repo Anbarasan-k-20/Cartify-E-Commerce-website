@@ -3,6 +3,8 @@ import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { placeOrder } from "../store/buyProductSlice"; // RTK slice
 
+import { resetOrder } from "../store/buyProductSlice";
+
 import { useLocation, useNavigate } from "react-router-dom";
 import Alert from "@mui/material/Alert";
 
@@ -10,8 +12,8 @@ const BuyProduct = () => {
   const dispatch = useDispatch();
   const location = useLocation();
   const navigate = useNavigate();
-    const { loading, success, error } = useSelector((state) => state.buyProduct);
-    
+  const { loading, success, error } = useSelector((state) => state.buyProduct);
+
   // ✅ Get product from navigation state
   const product = location.state?.product;
 
@@ -50,6 +52,16 @@ const BuyProduct = () => {
       }));
     }
   }, []);
+
+  useEffect(() => {
+    if (success) {
+      const timer = setTimeout(() => {
+        dispatch(resetOrder());
+      }, 3000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [success, dispatch]);
 
   const deliveryFee = selectedDelivery === "standard" ? 40 : 59;
   const codFee = 7;
@@ -90,7 +102,7 @@ const BuyProduct = () => {
       phone: formData.phone,
       email: formData.email,
       // Product info
-      productId: product._id,
+      productId: String(product._id),
       productTitle: product.title,
       productPrice: product.discountPrice,
       productImage: product.image,
@@ -100,9 +112,9 @@ const BuyProduct = () => {
       deliveryFee,
       codFee,
       totalAmount: total,
-      orderStatus: "pending",
+      // ✅ REMOVED: orderStatus - backend sets this
     };
-
+    // console.log("Sending Order Data:", orderData);
     // ✅ Dispatch order
     try {
       await dispatch(placeOrder(orderData)).unwrap();

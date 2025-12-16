@@ -9,7 +9,9 @@ import {
   increaseQtyDB,
   decreaseQtyDB,
 } from "../store/cartSlice";
+
 import { IoBagCheckOutline } from "react-icons/io5";
+
 // import Button from "@mui/material/Button";
 
 export default function Cart() {

@@ -3,7 +3,6 @@ import axiosInstance from "../axiosInstance";
 
 const API = import.meta.env.VITE_API_BASE_URL;
 
-// ✅ LINES 8-24: Replace entire placeOrder thunk
 export const placeOrder = createAsyncThunk(
   "buyProduct/placeOrder",
   async (orderData, { rejectWithValue }) => {
@@ -45,7 +44,6 @@ const buyProductSlice = createSlice({
       .addCase(placeOrder.fulfilled, (state, action) => {
         state.loading = false;
         state.success = true;
-        // ✅ Change from action.payload.order to action.payload.data
         state.order = action.payload.data;
         state.error = null;
       })

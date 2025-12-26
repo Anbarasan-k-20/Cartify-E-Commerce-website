@@ -27,8 +27,7 @@ export const upload = multer({
       );
   },
   limits: {
-    // adjust to your needs
-    fileSize: 20 * 1024 * 1024, // 20MB
+    fileSize: 20 * 1024 * 1024,
   },
 });
 
@@ -38,11 +37,6 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-/**
- * uploadToCloudinary(buffer)
- * Used only for single-product image upload (createProducts).
- * Bulk imports DO NOT call this — they store the image URL directly.
- */
 export const uploadToCloudinary = async (buffer) => {
   return new Promise((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream(

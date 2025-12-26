@@ -1,12 +1,12 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import axiosInstance from "../axiosInstance"; // ✅ use axiosInstance
+import axiosInstance from "../axiosInstance";
 
 // GET all cart items
 export const fetchCart = createAsyncThunk(
   "cart/fetchCart",
   async (_, { rejectWithValue }) => {
     try {
-      const res = await axiosInstance.get("/cart"); // ✅ token auto-attached
+      const res = await axiosInstance.get("/cart");
       return res.data.data;
     } catch (err) {
       return rejectWithValue(err.response?.data?.message || "Fetch failed");
@@ -28,7 +28,7 @@ export const addToCartDB = createAsyncThunk(
         image: product.image,
         rating: product.rating,
       };
-      const res = await axiosInstance.post("/cart", payload); // ✅ token auto-attached
+      const res = await axiosInstance.post("/cart", payload); 
       return res.data.data;
     } catch (err) {
       return rejectWithValue(err.response?.data?.message || "Add failed");

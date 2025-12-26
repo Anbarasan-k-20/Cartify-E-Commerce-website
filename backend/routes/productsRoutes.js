@@ -8,14 +8,14 @@ import {
   importProductsXLS,
 } from "../controllers/productController.js";
 import { protect } from "../middleware/authMiddleware.js";
-import { authorizeRoles } from "../middleware/roleMiddleware.js"; // ✅ new middleware
+import { authorizeRoles } from "../middleware/roleMiddleware.js"; // new middleware
 
 const router = express.Router();
 
 router.get("/products", getAllProducts);
 router.get("/products/:id", getProductById);
 
-// ✅ Only admin can create/import products
+// Only admin can create/import products
 router.post(
   "/createProducts",
   protect,

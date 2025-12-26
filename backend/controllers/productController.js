@@ -4,10 +4,6 @@ import Category from "../models/Category.js";
 import { uploadToCloudinary } from "../middleware/uploadImage.js";
 import XLSX from "xlsx";
 
-/*
- * Helper: isValidUrl
- * Basic URL validation. It's permissive (http/https).
- */
 const isValidUrl = (value) => {
   if (!value || typeof value !== "string") return false;
   try {
@@ -18,14 +14,6 @@ const isValidUrl = (value) => {
   }
 };
 
-/**
- * normalizeProductObject(raw)
- * - Accepts an object from JSON import or parsed Excel row.
- * - Ensures required fields exist: title, price, description, category.
- * - Coerces types and returns object matching Product schema.
- * - Returns null if required fields are missing / invalid.
- */
-
 const normalizeProductObject = async (raw) => {
   if (!raw || typeof raw !== "object") return null;
   const title = raw.title ? String(raw.title).trim() : "";
@@ -35,14 +23,11 @@ const normalizeProductObject = async (raw) => {
   const categoryName = raw.category ? String(raw.category).trim() : "";
 
   if (!title || Number.isNaN(price) || !description || !categoryName) {
-    // Required fields missing — skip this record
     return null;
   }
 
-  // image: accept URL string, otherwise empty string
   const image =
     raw.image && typeof raw.image === "string" ? raw.image.trim() : "";
-  // brand, discountPrice, stock
   const brand = raw.brand ? String(raw.brand).trim() : "";
   const discountPrice =
     raw.discountPrice !== undefined && raw.discountPrice !== null
@@ -50,22 +35,17 @@ const normalizeProductObject = async (raw) => {
       : 0;
   const stock =
     raw.stock !== undefined && raw.stock !== null ? Number(raw.stock) : 0;
-
-  // sizes: support JSON array or comma-separated string
   let sizes = [];
   if (Array.isArray(raw.sizes)) {
     sizes = raw.sizes.map((s) => String(s).trim()).filter(Boolean);
   } else if (typeof raw.sizes === "string" && raw.sizes.trim() !== "") {
-    // Accept formats like "S,M,L" or '["S","M"]'
     const trimmed = raw.sizes.trim();
     if (trimmed.startsWith("[") && trimmed.endsWith("]")) {
-      // try parse JSON array string
       try {
         const parsed = JSON.parse(trimmed);
         if (Array.isArray(parsed))
           sizes = parsed.map((s) => String(s).trim()).filter(Boolean);
       } catch {
-        // fallback to comma split
         sizes = trimmed
           .replace(/^\[|\]$/g, "")
           .split(",")
@@ -80,13 +60,11 @@ const normalizeProductObject = async (raw) => {
     }
   }
 
-  // rating fields
   const rate =
     raw.rate !== undefined && raw.rate !== null ? Number(raw.rate) : 0;
   const count =
     raw.count !== undefined && raw.count !== null ? Number(raw.count) : 0;
 
-  // Ensure category exists or create
   let category = await Category.findOne({ name: categoryName });
   if (!category) {
     category = await Category.create({ name: categoryName });
@@ -97,7 +75,7 @@ const normalizeProductObject = async (raw) => {
     price,
     description,
     category: category.name,
-    image: image && isValidUrl(image) ? image : "", // store only valid URLs (otherwise empty)
+    image: image && isValidUrl(image) ? image : "",
     brand,
     discountPrice: isNaN(discountPrice) ? 0 : discountPrice,
     stock: isNaN(stock) ? 0 : stock,
@@ -108,8 +86,6 @@ const normalizeProductObject = async (raw) => {
     },
   };
 };
-
-/* ----------------- Existing endpoints ----------------- */
 
 export const getAllProducts = async (req, res) => {
   try {
@@ -203,15 +179,6 @@ export const createProduct = async (req, res) => {
     });
   }
 };
-
-/* ----------------- Bulk Import Endpoints ----------------- */
-
-/**
- * POST /products/import-json
- * Upload: single .json file (multipart/form-data key: file)
- * JSON file must contain an array of products (each product is an object).
- * Image field is expected to be a URL and will be stored directly.
- */
 export const importProductsJSON = async (req, res) => {
   try {
     if (!req.file) {
@@ -263,7 +230,6 @@ export const importProductsJSON = async (req, res) => {
       });
     }
 
-    // Insert and continue on errors (ordered: false)
     const created = await Product.insertMany(normalized, { ordered: false });
 
     return res.status(201).json({
@@ -284,14 +250,6 @@ export const importProductsJSON = async (req, res) => {
   }
 };
 
-/**
- * POST /products/import-xls
- * Upload: single Excel file (.xls or .xlsx) (multipart/form-data key: file)
- * The first sheet is used. Column headers must be:
- * title, price, description, category, image, brand, discountPrice, stock, sizes, rate, count
- * sizes may be "S,M,L" or a JSON array string '["S","M"]'
- */
-
 export const importProductsXLS = async (req, res) => {
   try {
     if (!req.file) {
@@ -300,7 +258,6 @@ export const importProductsXLS = async (req, res) => {
         .json({ success: false, message: "No Excel file uploaded" });
     }
 
-    // Read workbook from buffer
     const workbook = XLSX.read(req.file.buffer, { type: "buffer" });
     const sheetName = workbook.SheetNames[0];
     if (!sheetName) {
@@ -310,7 +267,6 @@ export const importProductsXLS = async (req, res) => {
     }
 
     const sheet = workbook.Sheets[sheetName];
-    // defval: "" ensures we do not get undefined for empty cells
     const rows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
 
     if (!Array.isArray(rows) || rows.length === 0) {

@@ -11,6 +11,7 @@ import ProductDetailPage from "./components/ProductDetailPage";
 import PageNotFound from "./pages/PageNotFound";
 import BuyProduct from "./pages/BuyProduct";
 // import { useEffect } from "react";
+import AdminDash from "./components/AdminDashboard";
 const App = () => {
   //   useEffect(() => {
   //   // Check if user is logged in
@@ -30,6 +31,7 @@ const App = () => {
           <Route path={"/cart"} element={<Cart />} />
           <Route path="/product/:id" element={<ProductDetailPage />} />
           <Route path={"/buyproduct"} element={<BuyProduct />} />
+          <Route path={"/admindash"} element={<AdminDash />} />
           <Route path="*" element={<PageNotFound />} />
         </Routes>
       </BrowserRouter>

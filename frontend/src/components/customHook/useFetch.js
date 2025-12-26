@@ -7,6 +7,7 @@ const useFetch = (url) => {
   const [isError, setIsError] = useState("");
 
   useEffect(() => {
+    console.log("api call");
     const apiCall = async () => {
       try {
         const response = await axios.get(url);

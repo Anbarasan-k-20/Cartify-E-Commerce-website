@@ -20,10 +20,9 @@ const userSchema = new mongoose.Schema({
     required: true,
     select: false,
   },
-  role: { type: String, enum: ["user", "admin"], default: "user" }, // ✅ Added role field
+  role: { type: String, enum: ["user", "admin"], default: "user" },
 });
 
-// hash only if password changed
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
 
@@ -33,7 +32,6 @@ userSchema.pre("save", async function (next) {
   next();
 });
 
-// password validator
 userSchema.methods.matchPassword = async function (pwd) {
   return await bcrypt.compare(pwd, this.password);
 };

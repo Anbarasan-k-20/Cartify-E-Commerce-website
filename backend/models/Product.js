@@ -14,7 +14,7 @@ const productSchema = new mongoose.Schema(
     discountPrice: { type: Number, required: true },
     stock: { type: Number, default: 0 },
     sizes: {
-      type: [String], // ["S", "M", "L"]
+      type: [String],
       default: [],
     },
     rating: {

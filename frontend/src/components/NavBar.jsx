@@ -8,7 +8,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 
 const API = import.meta.env.VITE_API_BASE_URL;
-// ...imports remain unchanged
+
 const NavBar = () => {
   const count = useSelector(selectCartCount);
   const [query, setQuery] = useState("");
@@ -159,7 +159,7 @@ const NavBar = () => {
               </li>
             )}
 
-            {/*   For Dev Purpose*/}
+            {/*   dev Purpose*/}
             {/* <li className="nav-item me-2">
               <Link to="/buyproduct" className="nav-link">
                 BuyProduct

@@ -2,13 +2,11 @@ import mongoose from "mongoose";
 
 const orderSchema = new mongoose.Schema(
   {
-    // ✅ User Reference
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
-    // ✅ Product Info
     productId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Product",
@@ -31,8 +29,6 @@ const orderSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-
-    // ✅ Billing Address
     firstName: {
       type: String,
       required: true,
@@ -82,8 +78,6 @@ const orderSchema = new mongoose.Schema(
       required: true,
       lowercase: true,
     },
-
-    // ✅ Delivery & Payment
     deliveryType: {
       type: String,
       enum: ["standard", "express"],
@@ -101,8 +95,6 @@ const orderSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
-
-    // ✅ Order Status
     orderStatus: {
       type: String,
       enum: ["pending", "confirmed", "shipped", "delivered", "cancelled"],

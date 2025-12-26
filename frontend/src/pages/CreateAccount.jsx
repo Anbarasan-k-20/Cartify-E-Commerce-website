@@ -18,7 +18,7 @@ const CreateAccount = () => {
     email: "",
     password: "",
     confirmpassword: "",
-    role: "user", // ✅ default role
+    role: "user", //default role
   });
 
   const navigate = useNavigate();
@@ -62,7 +62,7 @@ const CreateAccount = () => {
         phone: create.phone,
         email: create.email,
         password: create.password,
-        role: create.role, // ✅ send role to backend
+        role: create.role, //send role to backend
       });
 
       setAlertMsg(true);
@@ -174,7 +174,7 @@ const CreateAccount = () => {
               </span>
             </div>
 
-            {/* ✅ Role Selection */}
+            {/* Role Selection */}
             <label className="form-label mt-3">Account Type</label>
             <div className="d-flex gap-3">
               <div className="form-check">

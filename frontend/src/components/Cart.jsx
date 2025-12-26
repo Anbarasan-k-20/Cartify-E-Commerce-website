@@ -12,8 +12,6 @@ import {
 
 import { IoBagCheckOutline } from "react-icons/io5";
 
-// import Button from "@mui/material/Button";
-
 export default function Cart() {
   const dispatch = useDispatch();
   const navigate =useNavigate()
@@ -22,14 +20,14 @@ export default function Cart() {
     loading,
     error,
   } = useSelector((state) => state.cart || {});
-  const [showAlert, setShowAlert] = useState(false);
-  const [busyId, setBusyId] = useState(null); // disables buttons per-item while request in-flight
+
+const [showAlert, setShowAlert] = useState(false);
+const [busyId, setBusyId] = useState(null); // disables buttons per-item while request in-flight
 
   useEffect(() => {
     dispatch(fetchCart());
   }, [dispatch]);
 
-  // ✅ NEW: Handle Buy Now from cart
   const handleBuyNow = (item) => {
     // Convert cart item to product format
     const product = {
@@ -41,13 +39,10 @@ export default function Cart() {
       category: item.category,
       image: item.image,
       rating: item.rating,
-      quantity: item.quantity, // ✅ Include current quantity
+      quantity: item.quantity, 
     };
-    // ✅ Pass product data via navigation state
     navigate("/buyproduct", { state: { product } });
   };
-
-  // ...existing code...
   const handleDelete = async (id) => {
     try {
       setBusyId(id);
@@ -56,7 +51,6 @@ export default function Cart() {
       setTimeout(() => setShowAlert(false), 2000);
     } catch (err) {
       console.error("Delete failed:", err);
-      // optional: show user feedback
     } finally {
       setBusyId(null);
     }

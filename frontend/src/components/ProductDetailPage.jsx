@@ -17,7 +17,7 @@ const ProductDetailPage = () => {
   const [product, setProduct] = useState(null);
   const [successMessage, setSuccessMessage] = useState("");
   const dispatch = useDispatch();
-  const navigate = useNavigate(); // ✅ added
+  const navigate = useNavigate();
 
   // console.log(id)
   useEffect(() => {
@@ -30,7 +30,7 @@ const ProductDetailPage = () => {
   const handleAddToCart = async () => {
     const token = localStorage.getItem("token");
     if (!token) {
-      navigate("/login"); // ✅ redirect if not logged in
+      navigate("/login");
       return;
     }
     try {
@@ -46,7 +46,7 @@ const ProductDetailPage = () => {
     const token = localStorage.getItem("token");
     
     if (!token) {
-      navigate("/login"); // redirect if not logged in
+      navigate("/login"); 
       return;
     }
       navigate("/buyproduct", { state: { product } });

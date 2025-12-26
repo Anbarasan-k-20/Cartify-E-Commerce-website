@@ -8,11 +8,11 @@ import {
   decreaseQty,
 } from "../controllers/cartList.js";
 import { protect } from "../middleware/authMiddleware.js";
-import { authorizeRoles } from "../middleware/roleMiddleware.js"; // ✅ new middleware
+import { authorizeRoles } from "../middleware/roleMiddleware.js"; // new middleware
 
 const router = express.Router();
 
-// ✅ Cart actions require login (user or admin)
+//  Cart actions require login (user or admin)
 router.get("/", protect, authorizeRoles("user", "admin"), getCartList);
 router.post("/", protect, authorizeRoles("user", "admin"), addToCart);
 router.delete("/:id", protect, authorizeRoles("user", "admin"), deleteCartItem);

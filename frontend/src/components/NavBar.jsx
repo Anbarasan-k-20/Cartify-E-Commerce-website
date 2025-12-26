@@ -158,14 +158,6 @@ const NavBar = () => {
                 </Link>
               </li>
             )}
-
-            {/*   dev Purpose*/}
-            {/* <li className="nav-item me-2">
-              <Link to="/buyproduct" className="nav-link">
-                BuyProduct
-              </Link>
-            </li> */}
-            {/*   For Dev Purpose*/}
           </ul>
         </div>
       </div>

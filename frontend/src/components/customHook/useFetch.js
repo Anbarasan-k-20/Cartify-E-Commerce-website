@@ -3,8 +3,8 @@ import axios from "axios";
 
 const useFetch = (url) => {
   const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [isError, setIsError] = useState("");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     console.log("api call");

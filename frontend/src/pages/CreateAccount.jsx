@@ -18,7 +18,7 @@ const CreateAccount = () => {
     email: "",
     password: "",
     confirmpassword: "",
-    role: "user", //default role
+    role: "user",
   });
 
   const navigate = useNavigate();

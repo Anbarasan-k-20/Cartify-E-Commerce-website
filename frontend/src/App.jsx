@@ -10,13 +10,7 @@ import "../src/App.css";
 import ProductDetailPage from "./components/ProductDetailPage";
 import PageNotFound from "./pages/PageNotFound";
 import BuyProduct from "./pages/BuyProduct";
-// import { useEffect } from "react";
 const App = () => {
-  //   useEffect(() => {
-  //   // Check if user is logged in
-  //   const token = localStorage.getItem("token");
-  //   console.log("App mounted, token:", token ? "exists" : "not found");
-  // }, []);
   return (
     <>
       <BrowserRouter>

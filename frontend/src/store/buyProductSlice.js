@@ -7,7 +7,6 @@ export const placeOrder = createAsyncThunk(
   "buyProduct/placeOrder",
   async (orderData, { rejectWithValue }) => {
     try {
-      // Use axiosInstance which auto-attaches token from localStorage
       const res = await axiosInstance.post("/orders/place-order", orderData);
       return res.data;
     } catch (err) {

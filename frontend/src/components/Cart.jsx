@@ -9,20 +9,19 @@ import {
   increaseQtyDB,
   decreaseQtyDB,
 } from "../store/cartSlice";
-
 import { IoBagCheckOutline } from "react-icons/io5";
 
 export default function Cart() {
   const dispatch = useDispatch();
-  const navigate =useNavigate()
+  const navigate = useNavigate();
   const {
     cart = [],
     loading,
     error,
   } = useSelector((state) => state.cart || {});
 
-const [showAlert, setShowAlert] = useState(false);
-const [busyId, setBusyId] = useState(null); // disables buttons per-item while request in-flight
+  const [showAlert, setShowAlert] = useState(false);
+  const [busyId, setBusyId] = useState(null); // disables buttons per-item while request in-flight
 
   useEffect(() => {
     dispatch(fetchCart());
@@ -39,7 +38,7 @@ const [busyId, setBusyId] = useState(null); // disables buttons per-item while r
       category: item.category,
       image: item.image,
       rating: item.rating,
-      quantity: item.quantity, 
+      quantity: item.quantity,
     };
     navigate("/buyproduct", { state: { product } });
   };

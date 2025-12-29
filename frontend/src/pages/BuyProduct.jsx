@@ -14,7 +14,6 @@ const BuyProduct = () => {
   const navigate = useNavigate();
   const { loading, success, error } = useSelector((state) => state.buyProduct);
 
-  // ✅ Get product from navigation state
   const product = location.state?.product;
 
   const [selectedDelivery, setSelectedDelivery] = useState("standard");
@@ -32,14 +31,12 @@ const BuyProduct = () => {
     email: "",
   });
 
-  // ✅ Redirect if no product is passed
   useEffect(() => {
     if (!product) {
       navigate("/products");
     }
   }, [product, navigate]);
 
-  // ✅ Auto-fill user email if logged in
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("user"));
     if (user?.email) {
@@ -72,7 +69,6 @@ const BuyProduct = () => {
   };
 
   const handlePlaceOrder = async () => {
-    // ✅ Validate form
     if (
       !formData.firstName ||
       !formData.lastName ||
@@ -86,8 +82,6 @@ const BuyProduct = () => {
       alert("Please fill all required fields");
       return;
     }
-
-    // ✅ Prepare order data with product info
     const orderData = {
       // User info
       firstName: formData.firstName,
@@ -112,10 +106,8 @@ const BuyProduct = () => {
       deliveryFee,
       codFee,
       totalAmount: total,
-      // ✅ REMOVED: orderStatus - backend sets this
+     
     };
-    // console.log("Sending Order Data:", orderData);
-    // ✅ Dispatch order
     try {
       await dispatch(placeOrder(orderData)).unwrap();
       // Reset form after successful order
@@ -143,7 +135,6 @@ const BuyProduct = () => {
 
   return (
     <div className="container mt-4">
-      {/* ✅ Display success/error alerts */}
       {success && (
         <Alert severity="success" className="mb-3">
           Order placed successfully! Your order ID is saved.
@@ -156,7 +147,6 @@ const BuyProduct = () => {
       )}
 
       <div className="row">
-        {/* Billing Details */}
         <div className="col-md-7">
           <h4 className="mb-3">Billing Details</h4>
           <Form>
@@ -276,7 +266,6 @@ const BuyProduct = () => {
           </Form>
         </div>
 
-        {/* ✅ Order Summary - Now shows product details */}
         <div className="col-md-5">
           <Card>
             <Card.Header>Your Order</Card.Header>

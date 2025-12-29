@@ -71,7 +71,6 @@ const AddProduct = () => {
     }
   };
 
-  // Import file handler (single input supports JSON and Excel)
   const handleImportFileChange = (e) => {
     const file = e.target.files[0];
     setImportFile(file || null);
@@ -103,14 +102,11 @@ const AddProduct = () => {
       });
 
       if (res.data && res.data.success) {
-        // show basic success message
         alert(res.data.message || "Import successful");
-        // reset file input
         setImportFile(null);
         const fileInput = document.getElementById("import-file-input");
         if (fileInput) fileInput.value = "";
       } else {
-        // server responded but flagged issues
         alert(
           res.data.message ||
             "Import completed with issues. Check console for details."

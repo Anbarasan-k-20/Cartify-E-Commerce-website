@@ -14,7 +14,6 @@ const NavBar = () => {
   const [query, setQuery] = useState("");
   const [categories, setCategories] = useState([]);
   const navigate = useNavigate();
-
   const user = JSON.parse(localStorage.getItem("user"));
 
   useEffect(() => {

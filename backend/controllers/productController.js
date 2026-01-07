@@ -13,7 +13,6 @@ const isValidUrl = (value) => {
     return false;
   }
 };
-
 const normalizeProductObject = async (raw) => {
   if (!raw || typeof raw !== "object") return null;
   const title = raw.title ? String(raw.title).trim() : "";

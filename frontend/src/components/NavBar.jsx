@@ -47,7 +47,6 @@ const NavBar = () => {
           <PiShoppingCartSimpleBold size={28} color="grey" className="me-2" />
           CARTIFY
         </Link>
-
         <form
           onSubmit={handleSearch}
           className="d-flex align-items-center flex-grow-1 mx-3"

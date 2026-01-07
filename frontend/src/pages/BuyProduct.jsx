@@ -8,14 +8,17 @@ import { resetOrder } from "../store/buyProductSlice";
 import { useLocation, useNavigate } from "react-router-dom";
 import Alert from "@mui/material/Alert";
 
+import validator from "validator";
+
+import PhoneInput from "react-phone-input-2";
+import "react-phone-input-2/lib/bootstrap.css";
+
 const BuyProduct = () => {
   const dispatch = useDispatch();
   const location = useLocation();
   const navigate = useNavigate();
   const { loading, success, error } = useSelector((state) => state.buyProduct);
-
   const product = location.state?.product;
-
   const [selectedDelivery, setSelectedDelivery] = useState("standard");
   const [formData, setFormData] = useState({
     firstName: "",
@@ -65,13 +68,27 @@ const BuyProduct = () => {
   const total = (product?.discountPrice || 0) + deliveryFee + codFee;
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+
+    // PIN: only digits, max 6
+    if (name === "pin") {
+      if (!/^\d{0,6}$/.test(value)) return;
+    }
+
+    // PHONE: allow + and digits only
+    if (name === "phone") {
+      if (!/^\+?\d*$/.test(value)) return;
+    }
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
   const handlePlaceOrder = async () => {
     if (
       !formData.firstName ||
-      !formData.lastName ||
       !formData.street ||
       !formData.city ||
       !formData.state ||
@@ -82,6 +99,29 @@ const BuyProduct = () => {
       alert("Please fill all required fields");
       return;
     }
+
+    // PIN validation
+    if (
+      !validator.isLength(formData.pin, { min: 6, max: 6 }) ||
+      !validator.isNumeric(formData.pin)
+    ) {
+      alert("PIN code must be exactly 6 digits");
+      return;
+    }
+
+    // Phone validation (+country code required)
+    const phoneWithPlus = `+${formData.phone}`;
+
+    if (!validator.isMobilePhone(phoneWithPlus, "en-IN")) {
+      alert("Enter a valid phone number with country code");
+      return;
+    }
+    // Email validation
+    if (!validator.isEmail(formData.email)) {
+      alert("Please enter a valid email address");
+      return;
+    }
+
     const orderData = {
       // User info
       firstName: formData.firstName,
@@ -96,7 +136,7 @@ const BuyProduct = () => {
       phone: formData.phone,
       email: formData.email,
       // Product info
-      productId: String(product._id),
+      productId: String(product._id), //productId: product._id?.toString(),
       productTitle: product.title,
       productPrice: product.discountPrice,
       productImage: product.image,
@@ -106,7 +146,6 @@ const BuyProduct = () => {
       deliveryFee,
       codFee,
       totalAmount: total,
-     
     };
     try {
       await dispatch(placeOrder(orderData)).unwrap();
@@ -161,21 +200,11 @@ const BuyProduct = () => {
             </Form.Group>
 
             <Form.Group className="mb-3">
-              <Form.Label>Last Name *</Form.Label>
+              <Form.Label>Last Name (Optinal)</Form.Label>
               <Form.Control
                 type="text"
                 name="lastName"
                 value={formData.lastName}
-                onChange={handleChange}
-              />
-            </Form.Group>
-
-            <Form.Group className="mb-3">
-              <Form.Label>Company Name (optional)</Form.Label>
-              <Form.Control
-                type="text"
-                name="company"
-                value={formData.company}
                 onChange={handleChange}
               />
             </Form.Group>
@@ -246,11 +275,20 @@ const BuyProduct = () => {
 
             <Form.Group className="mb-3">
               <Form.Label>Phone *</Form.Label>
-              <Form.Control
-                type="text"
-                name="phone"
+              <PhoneInput
+                country={"in"}
                 value={formData.phone}
-                onChange={handleChange}
+                onChange={(phone) =>
+                  setFormData((prev) => ({ ...prev, phone }))
+                }
+                inputProps={{
+                  name: "phone",
+                  required: true,
+                }}
+                inputStyle={{
+                  width: "100%",
+                  height: "38px",
+                }}
               />
             </Form.Group>
 

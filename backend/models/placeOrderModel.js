@@ -68,10 +68,11 @@ const orderSchema = new mongoose.Schema(
       required: true,
       match: /^[0-9]{6}$/,
     },
+    
     phone: {
       type: String,
       required: true,
-      match: /^[0-9]{10}$/,
+      match: [/^\+\d{10,15}$/, "Invalid phone number"],
     },
     email: {
       type: String,

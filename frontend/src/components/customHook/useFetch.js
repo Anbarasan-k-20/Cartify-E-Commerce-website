@@ -23,7 +23,6 @@ const useFetch = (url) => {
     };
     apiCall();
   }, [url]);
-
   return { products, loading, isError };
 };
 

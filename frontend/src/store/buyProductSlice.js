@@ -1,8 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axiosInstance from "../axiosInstance";
 
-const API = import.meta.env.VITE_API_BASE_URL;
-
 export const placeOrder = createAsyncThunk(
   "buyProduct/placeOrder",
   async (orderData, { rejectWithValue }) => {

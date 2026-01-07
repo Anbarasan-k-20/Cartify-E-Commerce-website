@@ -1,5 +1,7 @@
 import Order from "../models/placeOrderModel.js";
 import Product from "../models/Product.js";
+import validator from "validator";
+
 export const placeOrder = async (req, res) => {
   try {
     if (!req.user || !req.user._id) {
@@ -8,6 +10,7 @@ export const placeOrder = async (req, res) => {
         message: "Unauthorized. Please login to place an order",
       });
     }
+
     const {
       productId,
       productTitle,
@@ -31,6 +34,7 @@ export const placeOrder = async (req, res) => {
       totalAmount,
     } = req.body;
 
+    // Required fields validation
     if (
       !productId ||
       !productTitle ||
@@ -38,7 +42,6 @@ export const placeOrder = async (req, res) => {
       !productImage ||
       !category ||
       !firstName ||
-      !lastName ||
       !street ||
       !city ||
       !state ||
@@ -54,20 +57,54 @@ export const placeOrder = async (req, res) => {
         message: "Missing required fields",
       });
     }
-    if (!/^[0-9]{6}$/.test(pin)) {
+
+    // PIN validation
+    if (!/^\d{6}$/.test(pin)) {
       return res.status(400).json({
         success: false,
-        message: "PIN code must be 6 digits",
+        message: "PIN code must be exactly 6 digits",
       });
     }
 
-    if (!/^[0-9]{10}$/.test(phone)) {
+    // Phone validation (country code required)
+    const phoneWithPlus = `+${phone}`;
+    if (!validator.isMobilePhone(phoneWithPlus, "en-IN")) {
       return res.status(400).json({
         success: false,
-        message: "Phone number must be 10 digits",
+        message: "Invalid phone number with country code",
       });
     }
 
+    // Email validation
+    if (!validator.isEmail(email)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid email address",
+      });
+    }
+
+    // Numeric validation (SECURITY)
+    if (
+      !Number.isFinite(productPrice) ||
+      !Number.isFinite(deliveryFee) ||
+      !Number.isFinite(codFee) ||
+      !Number.isFinite(totalAmount)
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid price values",
+      });
+    }
+
+    // Delivery type validation
+    if (!["standard", "express"].includes(deliveryType)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid delivery type",
+      });
+    }
+
+    // Product verification
     const product = await Product.findById(productId);
     if (!product) {
       return res.status(404).json({
@@ -76,6 +113,17 @@ export const placeOrder = async (req, res) => {
       });
     }
 
+    // Total amount verification (anti-tampering)
+    const calculatedTotal = product.discountPrice + deliveryFee + codFee;
+
+    if (calculatedTotal !== totalAmount) {
+      return res.status(400).json({
+        success: false,
+        message: "Total amount mismatch",
+      });
+    }
+
+    // Create order
     const order = await Order.create({
       userId: req.user._id,
       productId,
@@ -84,15 +132,14 @@ export const placeOrder = async (req, res) => {
       productImage,
       category,
       firstName,
-      lastName,
-      company,
+      lastName, // optional
       country,
       street,
       apartment,
       city,
       state,
       pin,
-      phone,
+      phone: phoneWithPlus, // E.164 format
       email,
       deliveryType,
       deliveryFee,

@@ -1,17 +1,14 @@
 import { Button, Form, Card } from "react-bootstrap";
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { placeOrder } from "../store/buyProductSlice"; // RTK slice
-
-import { resetOrder } from "../store/buyProductSlice";
-
+import { placeOrder, resetOrder } from "../store/buyProductSlice";
 import { useLocation, useNavigate } from "react-router-dom";
 import Alert from "@mui/material/Alert";
-
 import validator from "validator";
-
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/bootstrap.css";
+
+import { Country, State } from "country-state-city";
 
 const BuyProduct = () => {
   const dispatch = useDispatch();
@@ -19,27 +16,63 @@ const BuyProduct = () => {
   const navigate = useNavigate();
   const { loading, success, error } = useSelector((state) => state.buyProduct);
   const product = location.state?.product;
+
+  // ✅ Countries & States from npm package (NO hardcoding)
+  const [countries, setCountries] = useState([]);
+  const [states, setStates] = useState([]);
+
   const [selectedDelivery, setSelectedDelivery] = useState("standard");
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
     company: "",
-    country: "India",
+    country: "IN", // ✅ Default India (ISO code)
+    state: "",
     street: "",
     apartment: "",
     city: "",
-    state: "",
     pin: "",
     phone: "",
     email: "",
   });
 
+  /* -----------------------------------
+     Load all countries once
+  ----------------------------------- */
   useEffect(() => {
-    if (!product) {
-      navigate("/products");
-    }
+    setCountries(Country.getAllCountries());
+  }, []);
+
+  // Redirect if no product
+  useEffect(() => {
+    if (!product) navigate("/products");
   }, [product, navigate]);
 
+  /* -----------------------------------
+     Load all countries once
+  ----------------------------------- */
+  useEffect(() => {
+    setCountries(Country.getAllCountries());
+  }, []);
+
+  /* -----------------------------------
+     Load states when country changes
+  ----------------------------------- */
+  useEffect(() => {
+    if (formData.country) {
+      const stateList = State.getStatesOfCountry(formData.country);
+      setStates(stateList);
+
+      // Reset state when country changes
+      setFormData((prev) => ({ ...prev, state: "" }));
+    }
+  }, [formData.country]);
+
+  /* -----------------------------------
+     Prefill logged-in user data
+  ----------------------------------- */
+
+  // Pre-fill user info
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("user"));
     if (user?.email) {
@@ -53,12 +86,12 @@ const BuyProduct = () => {
     }
   }, []);
 
+  // Reset order state after success
   useEffect(() => {
     if (success) {
       const timer = setTimeout(() => {
         dispatch(resetOrder());
       }, 3000);
-
       return () => clearTimeout(timer);
     }
   }, [success, dispatch]);
@@ -70,15 +103,8 @@ const BuyProduct = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
 
-    // PIN: only digits, max 6
-    if (name === "pin") {
-      if (!/^\d{0,6}$/.test(value)) return;
-    }
-
-    // PHONE: allow + and digits only
-    if (name === "phone") {
-      if (!/^\+?\d*$/.test(value)) return;
-    }
+    if (name === "pin" && !/^\d{0,6}$/.test(value)) return;
+    if (name === "phone" && !/^\+?\d*$/.test(value)) return;
 
     setFormData((prev) => ({
       ...prev,
@@ -100,7 +126,6 @@ const BuyProduct = () => {
       return;
     }
 
-    // PIN validation
     if (
       !validator.isLength(formData.pin, { min: 6, max: 6 }) ||
       !validator.isNumeric(formData.pin)
@@ -109,25 +134,22 @@ const BuyProduct = () => {
       return;
     }
 
-    // Phone validation (+country code required)
     const phoneWithPlus = `+${formData.phone}`;
-
     if (!validator.isMobilePhone(phoneWithPlus, "en-IN")) {
       alert("Enter a valid phone number with country code");
       return;
     }
-    // Email validation
+
     if (!validator.isEmail(formData.email)) {
       alert("Please enter a valid email address");
       return;
     }
 
     const orderData = {
-      // User info
       firstName: formData.firstName,
       lastName: formData.lastName,
       company: formData.company,
-      country: formData.country,
+      country: formData.country, // ISO code
       street: formData.street,
       apartment: formData.apartment,
       city: formData.city,
@@ -135,21 +157,21 @@ const BuyProduct = () => {
       pin: formData.pin,
       phone: formData.phone,
       email: formData.email,
-      // Product info
-      productId: String(product._id), //productId: product._id?.toString(),
+
+      productId: String(product._id),
       productTitle: product.title,
       productPrice: product.discountPrice,
       productImage: product.image,
       category: product.category,
-      // Order details
+
       deliveryType: selectedDelivery,
       deliveryFee,
       codFee,
       totalAmount: total,
     };
+
     try {
       await dispatch(placeOrder(orderData)).unwrap();
-      // Reset form after successful order
       setFormData({
         firstName: "",
         lastName: "",
@@ -168,15 +190,13 @@ const BuyProduct = () => {
     }
   };
 
-  if (!product) {
-    return <div className="text-center py-5">Loading...</div>;
-  }
+  if (!product) return <div className="text-center py-5">Loading...</div>;
 
   return (
     <div className="container mt-4">
       {success && (
         <Alert severity="success" className="mb-3">
-          Order placed successfully! Your order ID is saved.
+          Order placed successfully!
         </Alert>
       )}
       {error && (
@@ -200,7 +220,7 @@ const BuyProduct = () => {
             </Form.Group>
 
             <Form.Group className="mb-3">
-              <Form.Label>Last Name (Optinal)</Form.Label>
+              <Form.Label>Last Name (Optional)</Form.Label>
               <Form.Control
                 type="text"
                 name="lastName"
@@ -209,14 +229,37 @@ const BuyProduct = () => {
               />
             </Form.Group>
 
+            {/* COUNTRY DROPDOWN */}
             <Form.Group className="mb-3">
-              <Form.Label>Country / Region *</Form.Label>
+              <Form.Label>Country *</Form.Label>
               <Form.Select
                 name="country"
                 value={formData.country}
                 onChange={handleChange}
               >
-                <option>India</option>
+                {countries.map((c) => (
+                  <option key={c.isoCode} value={c.isoCode}>
+                    {c.name}
+                  </option>
+                ))}
+              </Form.Select>
+            </Form.Group>
+
+            {/* STATE DROPDOWN */}
+            <Form.Group className="mb-3">
+              <Form.Label>State *</Form.Label>
+              <Form.Select
+                name="state"
+                value={formData.state}
+                onChange={handleChange}
+                disabled={!states.length}
+              >
+                <option value="">Select state</option>
+                {states.map((s) => (
+                  <option key={s.isoCode} value={s.name}>
+                    {s.name}
+                  </option>
+                ))}
               </Form.Select>
             </Form.Group>
 
@@ -225,17 +268,17 @@ const BuyProduct = () => {
               <Form.Control
                 type="text"
                 name="street"
-                placeholder="House number and street name"
                 value={formData.street}
                 onChange={handleChange}
+                placeholder="House number and street name"
               />
               <Form.Control
-                className="mt-2"
                 type="text"
+                className="mt-2"
                 name="apartment"
-                placeholder="Apartment, suite, unit (optional)"
                 value={formData.apartment}
                 onChange={handleChange}
+                placeholder="Apartment, suite, unit (optional)"
               />
             </Form.Group>
 
@@ -247,20 +290,6 @@ const BuyProduct = () => {
                 value={formData.city}
                 onChange={handleChange}
               />
-            </Form.Group>
-
-            <Form.Group className="mb-3">
-              <Form.Label>State *</Form.Label>
-              <Form.Select
-                name="state"
-                value={formData.state}
-                onChange={handleChange}
-              >
-                <option>Select an option...</option>
-                <option>Tamil Nadu</option>
-                <option>Kerala</option>
-                <option>Karnataka</option>
-              </Form.Select>
             </Form.Group>
 
             <Form.Group className="mb-3">
@@ -276,19 +305,13 @@ const BuyProduct = () => {
             <Form.Group className="mb-3">
               <Form.Label>Phone *</Form.Label>
               <PhoneInput
-                country={"in"}
+                country="in"
                 value={formData.phone}
                 onChange={(phone) =>
                   setFormData((prev) => ({ ...prev, phone }))
                 }
-                inputProps={{
-                  name: "phone",
-                  required: true,
-                }}
-                inputStyle={{
-                  width: "100%",
-                  height: "38px",
-                }}
+                inputProps={{ name: "phone", required: true }}
+                inputStyle={{ width: "100%", height: "38px" }}
               />
             </Form.Group>
 
@@ -308,7 +331,6 @@ const BuyProduct = () => {
           <Card>
             <Card.Header>Your Order</Card.Header>
             <Card.Body>
-              {/* Product Image */}
               <div className="mb-3 text-center">
                 <img
                   src={product.image}
@@ -320,37 +342,27 @@ const BuyProduct = () => {
                   }}
                 />
               </div>
-
-              {/* Product Details */}
               <h6 className="fw-bold mb-2">{product.title}</h6>
               <p className="text-muted small mb-3">{product.description}</p>
-
               <hr />
-
-              {/* Price Breakdown */}
               <div className="d-flex justify-content-between mb-2">
                 <span>Product Price</span>
                 <span>₹{product.discountPrice}</span>
               </div>
-
               <div className="d-flex justify-content-between mb-2">
                 <span>Delivery ({selectedDelivery})</span>
                 <span>₹{deliveryFee}</span>
               </div>
-
               <div className="d-flex justify-content-between mb-3">
                 <span>COD Fee</span>
                 <span>₹{codFee}</span>
               </div>
-
               <hr />
-
               <div className="d-flex justify-content-between mb-3">
                 <strong>Total</strong>
                 <strong>₹{total}</strong>
               </div>
 
-              {/* Delivery Options */}
               <div className="mb-3">
                 <label className="fw-bold mb-2">Delivery Options:</label>
                 <div className="form-check">
@@ -362,9 +374,7 @@ const BuyProduct = () => {
                     checked={selectedDelivery === "standard"}
                     onChange={(e) => setSelectedDelivery(e.target.value)}
                   />
-                  <label className="form-check-label">
-                    Standard (Friday, 5 Dec) - ₹40
-                  </label>
+                  <label className="form-check-label">Standard - ₹40</label>
                 </div>
                 <div className="form-check">
                   <input
@@ -375,9 +385,7 @@ const BuyProduct = () => {
                     checked={selectedDelivery === "express"}
                     onChange={(e) => setSelectedDelivery(e.target.value)}
                   />
-                  <label className="form-check-label">
-                    Express (Thursday, 4 Dec) - ₹59
-                  </label>
+                  <label className="form-check-label">Express - ₹59</label>
                 </div>
               </div>
 

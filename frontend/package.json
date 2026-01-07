@@ -18,6 +18,7 @@
     "@tailwindcss/vite": "^4.1.17",
     "axios": "^1.12.2",
     "bootstrap": "^5.3.8",
+    "country-state-city": "^3.2.1",
     "icons": "^1.0.0",
     "react": "^19.2.0",
     "react-bootstrap": "^2.10.10",
@@ -28,6 +29,7 @@
     "react-phone-input-2": "^2.15.1",
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.9.4",
+    "react-select-country-list": "^2.2.3",
     "react-toastify": "^11.0.5",
     "tailwindcss": "^4.1.17",
     "validator": "^13.15.26"

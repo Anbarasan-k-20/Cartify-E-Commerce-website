@@ -1,3 +1,4 @@
+//D:\E Commerce Website\backend\controllers\authController.js
 import User from "../models/userModel.js";
 import bcrypt from "bcryptjs";
 import generateToken from "../utils/generateToken.js";

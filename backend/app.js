@@ -1,3 +1,4 @@
+//D:\E Commerce Website\backend\app.js
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
@@ -7,14 +8,21 @@ import cartRoute from "./routes/cartRoute.js";
 import authRoutes from "./routes/authRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
 
-import { connectDB } from "./db.js";
+import reviewRoutes from "./routes/reviewRoutes.js";
 
+import { connectDB } from "./db.js";
 const app = express();
 
 dotenv.config();
 
 // global Middleware
-app.use(cors());
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  })
+);
+
 app.use(express.json());
 
 // Connect to DB
@@ -34,6 +42,9 @@ app.use("/api/v1/categories", categoryRoutes);
 app.use("/api/v1/cart", cartRoute);
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/orders", orderRoutes);
+
+// for review
+app.use("/api/v1/reviews", reviewRoutes);
 
 const PORT = process.env.PORT;
 

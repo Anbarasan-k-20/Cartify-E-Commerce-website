@@ -6,33 +6,63 @@ import NavBar from "./components/NavBar";
 import Products from "./components/Products";
 import CreateAccount from "./pages/CreateAccount";
 import Cart from "./components/Cart";
-import "../src/App.css";
 import ProductDetailPage from "./components/ProductDetailPage";
 import PageNotFound from "./pages/PageNotFound";
 import BuyProduct from "./pages/BuyProduct";
-const App = () => {
-  // const user = JSON.parse(localStorage.getItem("user"));
 
+import ProtectedRoute from "./Routes/ProtectedRoute";
+
+import "../src/App.css";
+import Footer from "./components/Footer";
+
+const App = () => {
   return (
-    <>
-      <BrowserRouter>
-        <NavBar />
-        <Routes>
-          <Route path={"/"} element={<Home />} />
-          <Route path={"/products"} element={<Products />} />
-          <Route path={"/addproducts"} element={<AddProduct />} />
-          <Route path={"/login"} element={<Login />} />
-          <Route path={"/createaccount"} element={<CreateAccount />} />
-          <Route path={"/cart"} element={<Cart />} />
-          <Route path="/product/:id" element={<ProductDetailPage />} />
-          <Route path={"/buyproduct"} element={<BuyProduct />} />
-          <Route path="*" element={<PageNotFound />} />
-          {/* {user?.role === "admin" && (
-            <Route path={"/addproducts"} element={<AddProduct />} />
-          )} */}
-        </Routes>
-      </BrowserRouter>
-    </>
+    <BrowserRouter>
+      <NavBar />
+
+      <Routes>
+        {/* ===== Public Routes ===== */}
+        <Route path="/" element={<Home />} />
+        <Route path="/products" element={<Products />} />
+        <Route path="/product/:id" element={<ProductDetailPage />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/createaccount" element={<CreateAccount />} />
+
+        {/* ===== Protected Routes (Any logged-in user) ===== */}
+        <Route
+          path="/cart"
+          element={
+            <ProtectedRoute>
+              <Cart />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/buyproduct"
+          element={
+            <ProtectedRoute>
+              <BuyProduct />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* ===== Admin Only ===== */}
+        <Route
+          path="/addproducts"
+          element={
+            <ProtectedRoute role="admin">
+              <AddProduct />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* ===== Fallback ===== */}
+        <Route path="*" element={<PageNotFound />} />
+      </Routes>
+      <Footer/>
+    </BrowserRouter>
   );
 };
+
 export default App;

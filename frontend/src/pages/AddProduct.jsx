@@ -3,9 +3,9 @@ import { MdOutlineAddShoppingCart } from "react-icons/md";
 import { IoMdAdd } from "react-icons/io";
 import { useState, useEffect } from "react";
 import Alert from "@mui/material/Alert";
-import axios from "axios";
-
-const API = import.meta.env.VITE_API_BASE_URL || "";
+// import axios from "axios";
+import axiosInstance from "../axiosInstance";
+// const API = import.meta.env.VITE_API_BASE_URL || "";
 
 const sizeOptions = ["S", "M", "L", "XL", "XXL"];
 
@@ -36,7 +36,7 @@ const AddProduct = () => {
 
   const fetchCategories = async () => {
     try {
-      const res = await axios.get(`${API}/categories`);
+      const res = await axiosInstance.get("/categories");
       if (res.data.success) setCategories(res.data.data);
     } catch (error) {
       console.error("Error fetching categories:", error);
@@ -46,14 +46,17 @@ const AddProduct = () => {
   const handleAddCategory = async () => {
     if (!newCategory.trim()) return alert("Enter a category name");
     try {
-      const res = await axios.post(`${API}/categories`, { name: newCategory });
+      const res = await axiosInstance.post("/categories", {
+        name: newCategory,
+      });
       if (res.data.success) {
         setCategories((prev) => [...prev, res.data.data]);
         setNewCategory("");
         alert("New category added successfully!");
       }
     } catch (error) {
-      alert("Error adding category: " + error.message);
+      alert("Error adding category");
+      console.log(error);
     }
   };
 
@@ -72,52 +75,31 @@ const AddProduct = () => {
   };
 
   const handleImportFileChange = (e) => {
-    const file = e.target.files[0];
-    setImportFile(file || null);
+    setImportFile(e.target.files[0] || null);
   };
 
   const handleImportSubmit = async () => {
-    if (!importFile) {
-      alert("Please choose a JSON or Excel file to import.");
-      return;
-    }
+    if (!importFile) return alert("Choose a file");
 
-    const lowerName = importFile.name.toLowerCase();
-    let endpoint = null;
+    const lower = importFile.name.toLowerCase();
+    let endpoint = "";
 
-    if (lowerName.endsWith(".json")) endpoint = "/products/import-json";
-    else if (lowerName.endsWith(".xls") || lowerName.endsWith(".xlsx"))
+    if (lower.endsWith(".json")) endpoint = "/products/import-json";
+    else if (lower.endsWith(".xls") || lower.endsWith(".xlsx"))
       endpoint = "/products/import-xls";
-    else {
-      alert("Unsupported file type. Use .json, .xls or .xlsx");
-      return;
-    }
+    else return alert("Unsupported file type");
 
     const formData = new FormData();
     formData.append("file", importFile);
+
     setLoading(true);
     try {
-      const res = await axios.post(`${API}${endpoint}`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-
-      if (res.data && res.data.success) {
-        alert(res.data.message || "Import successful");
-        setImportFile(null);
-        const fileInput = document.getElementById("import-file-input");
-        if (fileInput) fileInput.value = "";
-      } else {
-        alert(
-          res.data.message ||
-            "Import completed with issues. Check console for details."
-        );
-        console.log("Import response:", res.data);
-      }
+      const res = await axiosInstance.post(endpoint, formData);
+      alert(res.data.message || "Import completed");
+      setImportFile(null);
     } catch (err) {
-      console.error("Import error:", err);
-      if (err.response?.data?.message)
-        alert("Import failed: " + err.response.data.message);
-      else alert("Error importing products: " + err.message);
+      alert("Import failed");
+      console.log(err);
     } finally {
       setLoading(false);
     }
@@ -166,9 +148,7 @@ const AddProduct = () => {
 
     setLoading(true);
     try {
-      const res = await axios.post(`${API}/createProducts`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      const res = await axiosInstance.post("/createProducts", formData);
 
       if (res.data.success) {
         setSuccess(true);
@@ -356,9 +336,7 @@ const AddProduct = () => {
           </div>
 
           <div className="col-6 col-md-3">
-            <label className="form-label my-1">
-              Product Image
-            </label>
+            <label className="form-label my-1">Product Image</label>
             <input
               type="file"
               name="image"

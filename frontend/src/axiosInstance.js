@@ -1,9 +1,11 @@
 import axios from "axios";
+
 const axiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:5000",
+  baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:3000/api/v1",
   timeout: 10000,
 });
-// Add token to every request
+
+// Token injection
 axiosInstance.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("token");
@@ -14,7 +16,8 @@ axiosInstance.interceptors.request.use(
   },
   (error) => Promise.reject(error)
 );
-// Handle response errors
+
+// Auto logout on 401
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -25,4 +28,5 @@ axiosInstance.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
 export default axiosInstance;

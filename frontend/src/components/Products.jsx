@@ -1,18 +1,35 @@
 // Product.jsx
-
 import Card from "react-bootstrap/Card";
-import useFetch from "./customHook/useFetch";
+// import useFetch from "./customHook/useFetch";
 
 import { Atom } from "react-loading-indicators";
 
 import { useNavigate, useLocation } from "react-router-dom";
-
-const API = import.meta.env.VITE_API_BASE_URL;
+import { useEffect, useState } from "react";
+import axiosInstance from "../axiosInstance";
+// const API = import.meta.env.VITE_API_BASE_URL;
 
 const Products = () => {
   const navigate = useNavigate();
 
-  const { products, loading, isError } = useFetch(`${API}/products`);
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [isError, setIsError] = useState("");
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const res = await axiosInstance.get("/products");
+        setProducts(res.data.data);
+      } catch (error) {
+        setIsError(error.response?.data?.message || "Failed to load products");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
 
   // GET SEARCH QUERY
   const location = useLocation();
@@ -78,9 +95,7 @@ const Products = () => {
 
                 {/* ratings */}
 
-                <Card.Text>
-                  ⭐{product.rating.rate}
-                </Card.Text>
+                <Card.Text>⭐{product.rating.rate}</Card.Text>
                 {/* Description clamps to 2 lines */}
                 <Card.Text
                   style={{

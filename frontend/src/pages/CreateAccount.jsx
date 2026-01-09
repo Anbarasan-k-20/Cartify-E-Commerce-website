@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Alert from "@mui/material/Alert";
-import axios from "axios";
+// import axios from "axios";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
-
-const API = import.meta.env.VITE_API_BASE_URL;
+import axiosInstance from "../axiosInstance";
+// const API = import.meta.env.VITE_API_BASE_URL;
 
 const CreateAccount = () => {
   const [alertMsg, setAlertMsg] = useState(false);
@@ -57,7 +57,7 @@ const CreateAccount = () => {
     setErrorMsg("");
 
     try {
-      await axios.post(`${API}/auth/register`, {
+      await axiosInstance.post(`/auth/register`, {
         fullname: create.fullname,
         phone: create.phone,
         email: create.email,

@@ -28,7 +28,7 @@ export const addToCartDB = createAsyncThunk(
         image: product.image,
         rating: product.rating,
       };
-      const res = await axiosInstance.post("/cart", payload); 
+      const res = await axiosInstance.post("/cart", payload);
       return res.data.data;
     } catch (err) {
       return rejectWithValue(err.response?.data?.message || "Add failed");

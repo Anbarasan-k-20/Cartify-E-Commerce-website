@@ -1,3 +1,4 @@
+//D:\E Commerce Website\backend\routes\productsRoutes.js
 import express from "express";
 import { upload } from "../middleware/uploadImage.js";
 import {

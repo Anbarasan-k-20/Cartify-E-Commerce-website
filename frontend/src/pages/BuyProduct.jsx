@@ -1,3 +1,4 @@
+//D:\E Commerce Website\frontend\src\pages\BuyProduct.jsx
 import { Button, Form, Card } from "react-bootstrap";
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";

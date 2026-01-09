@@ -1,10 +1,13 @@
+//D:\E Commerce Website\frontend\src\pages\Login.jsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Alert from "@mui/material/Alert";
-import axios from "axios";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
+// import axios from "axios";
 
-const API = import.meta.env.VITE_API_BASE_URL;
+import axiosInstance from "../axiosInstance";
+
+// const API = import.meta.env.VITE_API_BASE_URL;
 
 const Login = () => {
   let navigate = useNavigate();
@@ -32,7 +35,7 @@ const Login = () => {
     }
 
     try {
-      const res = await axios.post(`${API}/auth/login`, {
+      const res = await axiosInstance.post(`/auth/login`, {
         email: fields.email,
         password: fields.password,
       });

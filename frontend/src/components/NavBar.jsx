@@ -5,9 +5,11 @@ import { selectCartCount } from "../store/cartSlice";
 import { BsBagCheck } from "react-icons/bs";
 import { CiSearch } from "react-icons/ci";
 import { useState, useEffect } from "react";
-import axios from "axios";
+// import axios from "axios";
 
-const API = import.meta.env.VITE_API_BASE_URL;
+import axiosInstance from "../axiosInstance";
+
+// const API = import.meta.env.VITE_API_BASE_URL;
 
 const NavBar = () => {
   const count = useSelector(selectCartCount);
@@ -19,7 +21,7 @@ const NavBar = () => {
   useEffect(() => {
     const loadCategories = async () => {
       try {
-        const res = await axios.get(`${API}/categories`);
+        const res = await axiosInstance.get(`/categories`);
         setCategories(res.data.data || []);
       } catch (err) {
         console.error("Category fetch failed:", err);

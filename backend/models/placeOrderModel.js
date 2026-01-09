@@ -1,3 +1,4 @@
+//D:\E Commerce Website\backend\models\placeOrderModel.js
 import mongoose from "mongoose";
 
 const orderSchema = new mongoose.Schema(

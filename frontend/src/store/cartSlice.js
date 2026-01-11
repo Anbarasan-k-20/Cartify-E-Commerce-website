@@ -79,7 +79,13 @@ const cartSlice = createSlice({
     loading: false,
     error: null,
   },
-  reducers: {},
+  reducers: {
+    clearCart: (state) => {
+      state.cart = [];
+      state.loading = false;
+      state.error = null;
+    },
+  },
   extraReducers: (builder) => {
     builder
       // FETCH
@@ -131,6 +137,8 @@ const cartSlice = createSlice({
   },
 });
 
-export default cartSlice.reducer;
 export const selectCartCount = (state) =>
   state.cart.cart.reduce((sum, item) => sum + item.quantity, 0);
+
+export const { clearCart } = cartSlice.actions;
+export default cartSlice.reducer;

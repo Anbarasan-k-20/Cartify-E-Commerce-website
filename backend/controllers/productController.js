@@ -4,6 +4,7 @@ import Category from "../models/Category.js";
 import { uploadToCloudinary } from "../middleware/uploadImage.js";
 import XLSX from "xlsx";
 
+//Validate external image URLs (used in import)
 const isValidUrl = (value) => {
   if (!value || typeof value !== "string") return false;
   try {
@@ -13,60 +14,59 @@ const isValidUrl = (value) => {
     return false;
   }
 };
+//Normalize product object (used for JSON / Excel imports)
 const normalizeProductObject = async (raw) => {
   if (!raw || typeof raw !== "object") return null;
+
   const title = raw.title ? String(raw.title).trim() : "";
-  const price =
-    raw.price !== undefined && raw.price !== null ? Number(raw.price) : NaN;
+  const price = raw.price !== undefined ? Number(raw.price) : NaN;
   const description = raw.description ? String(raw.description).trim() : "";
   const categoryName = raw.category ? String(raw.category).trim() : "";
 
-  if (!title || Number.isNaN(price) || !description || !categoryName) {
-    return null;
-  }
+  // Required fields validation
+  if (!title || isNaN(price) || !description || !categoryName) return null;
 
-  const image =
-    raw.image && typeof raw.image === "string" ? raw.image.trim() : "";
+  // Ensure category exists
+  let category = await Category.findOne({ name: categoryName });
+  if (!category) category = await Category.create({ name: categoryName });
+
   const brand = raw.brand ? String(raw.brand).trim() : "";
-  const discountPrice =
-    raw.discountPrice !== undefined && raw.discountPrice !== null
-      ? Number(raw.discountPrice)
-      : 0;
-  const stock =
-    raw.stock !== undefined && raw.stock !== null ? Number(raw.stock) : 0;
+  const stock = raw.stock ? Number(raw.stock) : 0;
+  const discountPrice = raw.discountPrice ? Number(raw.discountPrice) : 0;
+
+  // Sizes parsing (string | array)
   let sizes = [];
   if (Array.isArray(raw.sizes)) {
-    sizes = raw.sizes.map((s) => String(s).trim()).filter(Boolean);
-  } else if (typeof raw.sizes === "string" && raw.sizes.trim() !== "") {
-    const trimmed = raw.sizes.trim();
-    if (trimmed.startsWith("[") && trimmed.endsWith("]")) {
-      try {
-        const parsed = JSON.parse(trimmed);
-        if (Array.isArray(parsed))
-          sizes = parsed.map((s) => String(s).trim()).filter(Boolean);
-      } catch {
-        sizes = trimmed
-          .replace(/^\[|\]$/g, "")
-          .split(",")
-          .map((s) => s.replace(/(^"|"$)/g, "").trim())
-          .filter(Boolean);
-      }
-    } else {
-      sizes = trimmed
-        .split(",")
-        .map((s) => s.trim())
-        .filter(Boolean);
-    }
+    sizes = raw.sizes.map(String).map((s) => s.trim());
+  } else if (typeof raw.sizes === "string") {
+    sizes = raw.sizes
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
   }
 
-  const rate =
-    raw.rate !== undefined && raw.rate !== null ? Number(raw.rate) : 0;
-  const count =
-    raw.count !== undefined && raw.count !== null ? Number(raw.count) : 0;
+  // Measurement logic
+  const measurementType = ["SIZE", "WEIGHT", "VOLUME"].includes(
+    raw.measurementType
+  )
+    ? raw.measurementType
+    : "SIZE";
 
-  let category = await Category.findOne({ name: categoryName });
-  if (!category) {
-    category = await Category.create({ name: categoryName });
+  let measurementOptions = [];
+  if (measurementType !== "SIZE") {
+    if (Array.isArray(raw.measurementOptions)) {
+      measurementOptions = raw.measurementOptions;
+    } else if (typeof raw.measurementOptions === "string") {
+      try {
+        measurementOptions = JSON.parse(raw.measurementOptions);
+      } catch {
+        measurementOptions = [];
+      }
+    }
+  }
+  // 🔒 IMAGE IS REQUIRED (import must follow same rules as manual add)
+  if (!isValidUrl(raw.image)) {
+    return null; // ❌ skip this product
   }
 
   return {
@@ -74,15 +74,13 @@ const normalizeProductObject = async (raw) => {
     price,
     description,
     category: category.name,
-    image: image && isValidUrl(image) ? image : "",
+    image: raw.image,
     brand,
-    discountPrice: isNaN(discountPrice) ? 0 : discountPrice,
-    stock: isNaN(stock) ? 0 : stock,
+    stock,
+    discountPrice,
+    measurementType,
+    measurementOptions,
     sizes,
-    rating: {
-      rate: isNaN(rate) ? 0 : rate,
-      count: isNaN(count) ? 0 : count,
-    },
   };
 };
 
@@ -116,20 +114,24 @@ export const getProductById = async (req, res) => {
     });
   }
 };
+//CREATE PRODUCT (manual admin add)
 
 export const createProduct = async (req, res) => {
+  console.log("CREATE PRODUCT HIT");
   try {
     const {
       title,
       price,
+      discountPrice,
       description,
       category,
       brand,
-      discountPrice,
       stock,
+      measurementType,
+      measurementOptions,
       sizes,
-      rate,
-      count,
+      // rate,
+      // count,
     } = req.body;
 
     if (!title || !price || !description || !category) {
@@ -138,15 +140,36 @@ export const createProduct = async (req, res) => {
         message: "Title, price, description, and category are required",
       });
     }
+    // ✅ VALIDATE measurementOptions for WEIGHT / VOLUME
+    if (
+      (measurementType === "WEIGHT" || measurementType === "VOLUME") &&
+      (!measurementOptions ||
+        (() => {
+          try {
+            return JSON.parse(measurementOptions).length === 0;
+          } catch {
+            return true;
+          }
+        })())
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Measurement options required",
+      });
+    }
 
     let existingCategory = await Category.findOne({ name: category });
     if (!existingCategory)
       existingCategory = await Category.create({ name: category });
 
-    let imageUrl = "";
-    if (req.file && req.file.buffer && req.file.mimetype.startsWith("image/")) {
-      imageUrl = await uploadToCloudinary(req.file.buffer);
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: "Product image is required",
+      });
     }
+
+    const imageUrl = await uploadToCloudinary(req.file.buffer);
 
     const product = await Product.create({
       title,
@@ -157,11 +180,26 @@ export const createProduct = async (req, res) => {
       brand: brand || "",
       discountPrice: discountPrice ? Number(discountPrice) : 0,
       stock: stock ? Number(stock) : 0,
-      sizes: sizes ? JSON.parse(sizes) : [],
-      rating: {
-        rate: rate ? Number(rate) : 0,
-        count: count ? Number(count) : 0,
-      },
+      // ✅ ADDED
+      measurementType,
+      measurementOptions:
+        measurementType === "SIZE"
+          ? []
+          : measurementOptions
+          ? (() => {
+              try {
+                return JSON.parse(measurementOptions);
+              } catch {
+                return [];
+              }
+            })()
+          : [],
+
+      sizes: measurementType === "SIZE" && sizes ? JSON.parse(sizes) : [],
+      // rating: {
+      //   rate: rate ? Number(rate) : 0,
+      //   count: count ? Number(count) : 0,
+      // },
     });
 
     return res.status(201).json({

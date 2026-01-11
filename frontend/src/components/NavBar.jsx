@@ -5,11 +5,13 @@ import { selectCartCount } from "../store/cartSlice";
 import { BsBagCheck } from "react-icons/bs";
 import { CiSearch } from "react-icons/ci";
 import { useState, useEffect } from "react";
-// import axios from "axios";
 
 import axiosInstance from "../axiosInstance";
 
-// const API = import.meta.env.VITE_API_BASE_URL;
+import { useDispatch } from "react-redux";
+import { clearCart } from "../store/cartSlice";
+
+import { fetchCart } from "../store/cartSlice";
 
 const NavBar = () => {
   const count = useSelector(selectCartCount);
@@ -17,6 +19,8 @@ const NavBar = () => {
   const [categories, setCategories] = useState([]);
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("user"));
+
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const loadCategories = async () => {
@@ -29,6 +33,13 @@ const NavBar = () => {
     };
     loadCategories();
   }, []);
+  //cart nabar mount
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      dispatch(fetchCart());
+    }
+  }, [dispatch]);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -39,6 +50,9 @@ const NavBar = () => {
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+
+    dispatch(clearCart()); // 🔥 THIS FIXES STALE COUNT
+
     navigate("/login");
   };
 

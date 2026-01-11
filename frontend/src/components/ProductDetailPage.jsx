@@ -151,7 +151,7 @@ const ProductDetailPage = () => {
             />
           </div>
         </div>
-
+        {product && console.log(product)}
         <div className="col-md-6">
           <h2 className="product-title">{product.title}</h2>
 
@@ -167,12 +167,19 @@ const ProductDetailPage = () => {
           <p>
             <strong>Category:</strong> {product.category}
           </p>
-          <p>
+          {/* <p>
             <strong>Ratings :</strong> ⭐{product.rating?.rate}
-          </p>
+          </p> */}
           <p>
             <strong>Product ID:</strong> {product._id}
           </p>
+
+          {product.sizes.length >=1 && (
+            <p>
+              <strong>Sizes Avilable :</strong>
+              {product.sizes}
+            </p>
+          )}
 
           {product.quantity < 10 && (
             <span className="badge bg-danger p-2 mb-2">

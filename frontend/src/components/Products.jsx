@@ -93,9 +93,6 @@ const Products = () => {
                   </Card.Text>
                 </div>
 
-                {/* ratings */}
-
-                <Card.Text>⭐{product.rating.rate}</Card.Text>
                 {/* Description clamps to 2 lines */}
                 <Card.Text
                   style={{

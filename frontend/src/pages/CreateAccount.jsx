@@ -1,10 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Alert from "@mui/material/Alert";
-// import axios from "axios";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import axiosInstance from "../axiosInstance";
-// const API = import.meta.env.VITE_API_BASE_URL;
 
 const CreateAccount = () => {
   const [alertMsg, setAlertMsg] = useState(false);
@@ -23,10 +21,28 @@ const CreateAccount = () => {
 
   const navigate = useNavigate();
 
+  // ✅ FIXED HANDLE CHANGE
   const handlechange = (e) => {
     let { name, value } = e.target;
-    if (name === "phone") value = value.replace(/\D/g, "");
-    if (name === "fullname") value = value.replace(/[^a-zA-Z ]/g, "");
+
+    if (name === "fullname") {
+      value = value.replace(/[^a-zA-Z ]/g, "");
+    }
+
+    if (name === "phone") {
+      value = value.replace(/\D/g, "");
+
+      // block if first digit is invalid
+      if (value.length === 1 && !/^[6-9]$/.test(value)) {
+        setErrorMsg("Phone number must start with 6, 7, 8, or 9");
+        return;
+      }
+
+      if (value.length > 10) return;
+
+      setErrorMsg("");
+    }
+
     setCreate({ ...create, [name]: value });
   };
 
@@ -38,8 +54,8 @@ const CreateAccount = () => {
       return;
     }
 
-    if (!/^[0-9]{10}$/.test(create.phone)) {
-      setErrorMsg("Phone number must be exactly 10 digits.");
+    if (!/^[6-9][0-9]{9}$/.test(create.phone)) {
+      setErrorMsg("Phone number must be 10 digits and start with 6-9.");
       return;
     }
 
@@ -62,7 +78,7 @@ const CreateAccount = () => {
         phone: create.phone,
         email: create.email,
         password: create.password,
-        role: create.role, //send role to backend
+        role: create.role,
       });
 
       setAlertMsg(true);
@@ -90,7 +106,6 @@ const CreateAccount = () => {
         <Alert severity="success">Account Created Successfully!</Alert>
       )}
       {errorMsg && <Alert severity="error">{errorMsg}</Alert>}
-
       <div
         className="d-flex justify-content-center align-items-center my-5"
         style={{ minHeight: "80vh" }}
@@ -109,7 +124,6 @@ const CreateAccount = () => {
               value={create.fullname}
               onChange={handlechange}
             />
-
             <label className="form-label mt-3">Phone Number</label>
             <input
               className="form-control"
@@ -123,9 +137,9 @@ const CreateAccount = () => {
             <input
               className="form-control"
               name="email"
+              type="email"
               value={create.email}
               onChange={handlechange}
-              type="email"
             />
 
             <label className="form-label mt-3">Password</label>
@@ -141,7 +155,7 @@ const CreateAccount = () => {
                 onClick={() => setShowPass(!showPass)}
                 style={{
                   position: "absolute",
-                  right: "10px",
+                  right: 10,
                   top: "50%",
                   transform: "translateY(-50%)",
                   cursor: "pointer",
@@ -164,7 +178,7 @@ const CreateAccount = () => {
                 onClick={() => setShowConfirmPass(!showConfirmPass)}
                 style={{
                   position: "absolute",
-                  right: "10px",
+                  right: 10,
                   top: "50%",
                   transform: "translateY(-50%)",
                   cursor: "pointer",
@@ -174,7 +188,6 @@ const CreateAccount = () => {
               </span>
             </div>
 
-            {/* Role Selection */}
             <label className="form-label mt-3">Account Type</label>
             <div className="d-flex gap-3">
               <div className="form-check">
@@ -206,7 +219,7 @@ const CreateAccount = () => {
             </button>
 
             <a
-              className="text-center mt-3"
+              className="text-center mt-3 d-block"
               style={{ fontSize: "12px", cursor: "pointer" }}
               onClick={() => navigate("/login")}
             >

@@ -4,6 +4,7 @@ import { IoMdAdd } from "react-icons/io";
 import { useState, useEffect } from "react";
 import Alert from "@mui/material/Alert";
 import axiosInstance from "../axiosInstance";
+import { useNavigate } from "react-router-dom";
 
 const sizeOptions = ["S", "M", "L", "XL", "XXL"];
 
@@ -43,7 +44,8 @@ const AddProduct = () => {
   const [categories, setCategories] = useState([]);
   const [newCategory, setNewCategory] = useState("");
   const [importFile, setImportFile] = useState(null);
-
+  const [submitted, setSubmitted] = useState(false); // ✅ SIMPLE FLAG
+  const navigate = useNavigate()
   useEffect(() => {
     fetchCategories();
   }, []);
@@ -89,14 +91,7 @@ const AddProduct = () => {
     const { name, value, files } = e.target;
     if (name === "image") {
       setValues({ ...values, image: files[0] });
-    }
-    //  else if (name === "rate" || name === "count") {
-    //   setValues((prev) => ({
-    //     ...prev,
-    //     rating: { ...prev.rating, [name]: value },
-    //   }));
-    // }
-    else {
+    } else {
       setValues({ ...values, [name]: value });
     }
   };
@@ -132,7 +127,6 @@ const AddProduct = () => {
     }
   };
 
-  // ✅ ADDED
   const toggleMeasurement = (option) => {
     setValues((prev) => {
       const exists = prev.measurementOptions.some(
@@ -162,6 +156,7 @@ const AddProduct = () => {
   // handleSubmit() ONLY (other UI code is already correct)
 
   const handleSubmit = async () => {
+    setSubmitted(true); // ✅ trigger red fields
     if (
       !values.title ||
       !values.price ||
@@ -233,6 +228,7 @@ const AddProduct = () => {
           sizes: [],
         });
         setTimeout(() => setSuccess(false), 3000);
+        navigate("/products")
       }
     } catch (error) {
       console.error(error);
@@ -261,7 +257,9 @@ const AddProduct = () => {
 
         <label className="form-label">Title *</label>
         <input
-          className="form-control mb-2"
+          className={`form-control mb-2 ${
+            submitted && !values.title ? "is-invalid" : ""
+          }`}
           name="title"
           value={values.title}
           onChange={handleChange}
@@ -269,7 +267,9 @@ const AddProduct = () => {
 
         <label className="form-label">Price *</label>
         <input
-          className="form-control mb-2"
+          className={`form-control mb-2 ${
+            submitted && !values.title ? "is-invalid" : ""
+          }`}
           type="number"
           name="price"
           value={values.price}
@@ -278,7 +278,9 @@ const AddProduct = () => {
 
         <label className="form-label">Discount Price</label>
         <input
-          className="form-control mb-2"
+          className={`form-control mb-2 ${
+            submitted && !values.title ? "is-invalid" : ""
+          }`}
           type="number"
           name="discountPrice"
           value={values.discountPrice}
@@ -287,7 +289,9 @@ const AddProduct = () => {
 
         <label className="form-label">Category *</label>
         <select
-          className="form-control mb-2"
+          className={`form-control mb-2 ${
+            submitted && !values.title ? "is-invalid" : ""
+          }`}
           name="category"
           value={values.category}
           onChange={handleChange}
@@ -319,7 +323,9 @@ const AddProduct = () => {
 
         <label className="form-label">Brand</label>
         <input
-          className="form-control mb-2"
+          className={`form-control mb-2 ${
+            submitted && !values.category ? "is-invalid" : ""
+          }`}
           name="brand"
           value={values.brand}
           onChange={handleChange}
@@ -327,7 +333,9 @@ const AddProduct = () => {
 
         <label className="form-label">Description *</label>
         <textarea
-          className="form-control mb-2"
+          className={`form-control mb-2 ${
+            submitted && !values.category ? "is-invalid" : ""
+          }`}
           rows="3"
           name="description"
           value={values.description}
@@ -336,42 +344,21 @@ const AddProduct = () => {
 
         <label className="form-label">Stock</label>
         <input
-          className="form-control mb-2"
+          className={`form-control mb-2 ${
+            submitted && !values.category ? "is-invalid" : ""
+          }`}
           type="number"
           name="stock"
           value={values.stock}
           onChange={handleChange}
         />
 
-        {/* <label className="form-label">Count</label>
-        <input
-          className="form-control mb-2"
-          type="number"
-          name="count"
-          value={values.rating.count}
-          onChange={handleChange}
-        /> */}
-
-        {/* <label className="form-label fw-semibold">Sizes</label>
-        <div className="d-flex gap-2 flex-wrap mb-4">
-          {sizeOptions.map((sz) => (
-            <button
-              key={sz}
-              type="button"
-              className={`btn btn-sm ${
-                values.sizes.includes(sz) ? "btn-dark" : "btn-outline-dark"
-              }`}
-              onClick={() => toggleSize(sz)}
-            >
-              {sz}
-            </button>
-          ))}
-        </div> */}
-
         {/* ✅ ADDED */}
         <label className="form-label mt-3">Measurement Type *</label>
         <select
-          className="form-control mb-3"
+          className={`form-control mb-2 ${
+            submitted && !values.category ? "is-invalid" : ""
+          }`}
           value={values.measurementType}
           onChange={(e) =>
             setValues({
@@ -440,7 +427,9 @@ const AddProduct = () => {
 
         <label className="form-label">Product Image</label>
         <input
-          className="form-control mb-3"
+          className={`form-control mb-2 ${
+            submitted && !values.category ? "is-invalid" : ""
+          }`}
           type="file"
           name="image"
           onChange={handleChange}

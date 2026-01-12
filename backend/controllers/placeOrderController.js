@@ -17,9 +17,10 @@ export const placeOrder = async (req, res) => {
       productPrice,
       productImage,
       category,
+      measurement, // ✅ for mesurement
       firstName,
       lastName,
-      company,
+      // company,
       country,
       street,
       apartment,
@@ -55,6 +56,17 @@ export const placeOrder = async (req, res) => {
       return res.status(400).json({
         success: false,
         message: "Missing required fields",
+      });
+    }
+
+    if (
+      !measurement ||
+      typeof measurement.value !== "number" ||
+      !measurement.unit
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Measurement is required",
       });
     }
 
@@ -131,6 +143,7 @@ export const placeOrder = async (req, res) => {
       productPrice,
       productImage,
       category,
+      measurement,
       firstName,
       lastName, // optional
       country,

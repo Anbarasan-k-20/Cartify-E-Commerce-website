@@ -117,7 +117,7 @@ export const getProductById = async (req, res) => {
 //CREATE PRODUCT (manual admin add)
 
 export const createProduct = async (req, res) => {
-  console.log("CREATE PRODUCT HIT");
+  // console.log("CREATE PRODUCT HIT");
   try {
     const {
       title,

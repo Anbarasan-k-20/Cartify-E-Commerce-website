@@ -1,9 +1,6 @@
 import mongoose from "mongoose";
 
-/**
- * Measurement schema
- * Used only for WEIGHT / VOLUME products
- */
+/*Measurement schema, Used only for WEIGHT / VOLUME products */
 const measurementSchema = new mongoose.Schema(
   {
     value: { type: Number, required: true }, // numeric value (e.g., 500, 1)
@@ -32,11 +29,9 @@ const productSchema = new mongoose.Schema(
 
     stock: { type: Number, default: 0 },
 
-    /**
-     * Measurement Type
-     * SIZE → sizes array
-     * WEIGHT / VOLUME → measurementOptions array
-     */
+    /*   * Measurement Type
+     *   SIZE → sizes array
+     *   WEIGHT / VOLUME → measurementOptions array */
     measurementType: {
       type: String,
       enum: ["SIZE", "WEIGHT", "VOLUME"],
@@ -58,10 +53,7 @@ const productSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-/**
- * Guard: prevent invalid data from entering DB
- * SIZE products must NOT have measurementOptions
- */
+/* Guard: prevent invalid data from entering DB, SIZE products must NOT have measurementOptions */
 productSchema.pre("save", function (next) {
   if (this.measurementType === "SIZE") {
     this.measurementOptions = [];

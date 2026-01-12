@@ -10,6 +10,8 @@ import orderRoutes from "./routes/orderRoutes.js";
 
 import reviewRoutes from "./routes/reviewRoutes.js";
 
+import userRoutes from "./routes/userRoutes.js";
+
 import { connectDB } from "./db.js";
 const app = express();
 
@@ -42,6 +44,8 @@ app.use("/api/v1/categories", categoryRoutes);
 app.use("/api/v1/cart", cartRoute);
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/orders", orderRoutes);
+
+app.use("/api/v1/users", userRoutes);
 
 // for review
 app.use("/api/v1/reviews", reviewRoutes);

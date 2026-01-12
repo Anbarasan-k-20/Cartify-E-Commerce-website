@@ -8,6 +8,15 @@ import Alert from "@mui/material/Alert";
 import validator from "validator";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/bootstrap.css";
+// for alert MUI
+
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogContentText from "@mui/material/DialogContentText";
+import DialogTitle from "@mui/material/DialogTitle";
+
+import axiosInstance from "../axiosInstance";
 
 import { Country, State } from "country-state-city";
 
@@ -16,33 +25,68 @@ const BuyProduct = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { loading, success, error } = useSelector((state) => state.buyProduct);
+
   const product = location.state?.product;
 
   // ✅ Countries & States from npm package (NO hardcoding)
   const [countries, setCountries] = useState([]);
   const [states, setStates] = useState([]);
-
   const [selectedDelivery, setSelectedDelivery] = useState("standard");
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
     company: "",
-    country: "IN", // ✅ Default India (ISO code)
+    country: "IN", // ✅ India default
     state: "",
     street: "",
     apartment: "",
     city: "",
     pin: "",
-    phone: "",
+    phone: "91", // ✅ India dial code default
     email: "",
   });
+  const [showConfirmation, setShowConfirmation] = useState(false);
 
-  /* -----------------------------------
-     Load all countries once
-  ----------------------------------- */
+  //
+  const selectedMeasurement = location.state?.selectedMeasurement;
+  const measurementType = product?.measurementType;
+
   useEffect(() => {
-    setCountries(Country.getAllCountries());
+    const fetchUser = async () => {
+      try {
+        const res = await axiosInstance.get("/users/profile");
+        const user = res.data.user;
+
+        let phone = user?.phone || "91";
+
+        // ensure phone starts with India dial code
+        if (!phone.startsWith("91")) {
+          phone = "91" + phone;
+        }
+
+        setFormData((prev) => ({
+          ...prev,
+          email: user?.email || "",
+          phone,
+          firstName: user?.fullname?.split(" ")[0] || "",
+          lastName: user?.fullname?.split(" ")[1] || "",
+          country: "IN", // 🔒 force India
+        }));
+      } catch (err) {
+        console.error("User fetch failed", err);
+      }
+    };
+
+    fetchUser();
   }, []);
+
+  useEffect(() => {
+    console.log("🧾 BUY PRODUCT PAGE DATA:", {
+      product,
+      selectedMeasurement,
+    });
+  }, [product, selectedMeasurement]);
+  //
 
   // Redirect if no product
   useEffect(() => {
@@ -68,24 +112,6 @@ const BuyProduct = () => {
       setFormData((prev) => ({ ...prev, state: "" }));
     }
   }, [formData.country]);
-
-  /* -----------------------------------
-     Prefill logged-in user data
-  ----------------------------------- */
-
-  // Pre-fill user info
-  useEffect(() => {
-    const user = JSON.parse(localStorage.getItem("user"));
-    if (user?.email) {
-      setFormData((prev) => ({
-        ...prev,
-        email: user.email,
-        firstName: user.fullname?.split(" ")[0] || "",
-        lastName: user.fullname?.split(" ")[1] || "",
-        phone: user.phone || "",
-      }));
-    }
-  }, []);
 
   // Reset order state after success
   useEffect(() => {
@@ -135,15 +161,44 @@ const BuyProduct = () => {
       return;
     }
 
-    const phoneWithPlus = `+${formData.phone}`;
-    if (!validator.isMobilePhone(phoneWithPlus, "en-IN")) {
-      alert("Enter a valid phone number with country code");
+    if (!formData.phone || formData.phone.length < 10) {
+      alert("Enter a valid phone number");
+      return;
+    }
+
+    const phoneE164 = `+${formData.phone}`;
+
+    if (!validator.isMobilePhone(phoneE164)) {
+      alert("Enter a valid phone number");
       return;
     }
 
     if (!validator.isEmail(formData.email)) {
       alert("Please enter a valid email address");
       return;
+    }
+
+    /* ---------- MEASUREMENT (FROM PRODUCT DETAIL PAGE) ---------- */
+
+    if (!selectedMeasurement) {
+      alert("Measurement not selected");
+      return;
+    }
+
+    let measurementPayload = null;
+
+    if (measurementType === "SIZE") {
+      measurementPayload = {
+        type: "SIZE",
+        value: selectedMeasurement, // "S", "M", "L"
+        unit: null,
+      };
+    } else {
+      measurementPayload = {
+        type: measurementType, // WEIGHT / VOLUME
+        value: selectedMeasurement.value,
+        unit: selectedMeasurement.unit,
+      };
     }
 
     const orderData = {
@@ -161,9 +216,12 @@ const BuyProduct = () => {
 
       productId: String(product._id),
       productTitle: product.title,
-      productPrice: product.discountPrice,
+      productPrice: product.discountPrice || product.price,
       productImage: product.image,
       category: product.category,
+
+      // ✅ measurement
+      measurement: measurementPayload,
 
       deliveryType: selectedDelivery,
       deliveryFee,
@@ -172,12 +230,14 @@ const BuyProduct = () => {
     };
 
     try {
+      console.log("🧾 FINAL ORDER PAYLOAD:", orderData); // dev purpose
       await dispatch(placeOrder(orderData)).unwrap();
       setFormData({
         firstName: "",
         lastName: "",
         company: "",
-        country: "India",
+        // country: "India",
+        country: "IN",
         street: "",
         apartment: "",
         city: "",
@@ -186,6 +246,8 @@ const BuyProduct = () => {
         phone: "",
         email: "",
       });
+      // ✅ Show confirmation popup
+      setShowConfirmation(true);
     } catch (err) {
       console.error("Order failed:", err);
     }
@@ -205,6 +267,29 @@ const BuyProduct = () => {
           {error}
         </Alert>
       )}
+      <Dialog
+        open={showConfirmation}
+        onClose={() => setShowConfirmation(false)}
+      >
+        <DialogTitle>Order Placed!</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Your product has been purchased successfully. Do you want to keep
+            shopping?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            variant="secondary"
+            onClick={() => setShowConfirmation(false)}
+          >
+            Cancel
+          </Button>
+          <Button variant="success" onClick={() => navigate("/products")}>
+            OK
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       <div className="row">
         <div className="col-md-7">
@@ -311,7 +396,7 @@ const BuyProduct = () => {
                 onChange={(phone) =>
                   setFormData((prev) => ({ ...prev, phone }))
                 }
-                inputProps={{ name: "phone", required: true }}
+                inputProps={{ required: true }}
                 inputStyle={{ width: "100%", height: "38px" }}
               />
             </Form.Group>
@@ -350,6 +435,16 @@ const BuyProduct = () => {
                 <span>Product Price</span>
                 <span>₹{product.discountPrice}</span>
               </div>
+
+              {selectedMeasurement && (
+                <p className="mb-2">
+                  <strong>Selected Measurement:</strong>{" "}
+                  {measurementType === "SIZE"
+                    ? selectedMeasurement
+                    : `${selectedMeasurement.value} ${selectedMeasurement.unit}`}
+                </p>
+              )}
+
               <div className="d-flex justify-content-between mb-2">
                 <span>Delivery ({selectedDelivery})</span>
                 <span>₹{deliveryFee}</span>

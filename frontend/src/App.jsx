@@ -9,9 +9,7 @@ import Cart from "./components/Cart";
 import ProductDetailPage from "./components/ProductDetailPage";
 import PageNotFound from "./pages/PageNotFound";
 import BuyProduct from "./pages/BuyProduct";
-
 import ProtectedRoute from "./Routes/ProtectedRoute";
-
 import "../src/App.css";
 import Footer from "./components/Footer";
 
@@ -32,7 +30,7 @@ const App = () => {
         <Route
           path="/cart"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute role="user">
               <Cart />
             </ProtectedRoute>
           }
@@ -60,7 +58,7 @@ const App = () => {
         {/* ===== Fallback ===== */}
         <Route path="*" element={<PageNotFound />} />
       </Routes>
-      <Footer/>
+      <Footer />
     </BrowserRouter>
   );
 };

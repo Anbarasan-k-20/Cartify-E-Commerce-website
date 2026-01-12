@@ -29,6 +29,16 @@ const orderSchema = new mongoose.Schema(
     category: {
       type: String,
       required: true,
+    },  // measurement
+    measurement: {
+      value: {
+        type: Number,
+        required: true,
+      },
+      unit: {
+        type: String,
+        required: true, // kg / g / ml / L / pcs
+      },
     },
     firstName: {
       type: String,
@@ -69,7 +79,7 @@ const orderSchema = new mongoose.Schema(
       required: true,
       match: /^[0-9]{6}$/,
     },
-    
+
     phone: {
       type: String,
       required: true,

@@ -33,13 +33,14 @@ const NavBar = () => {
     };
     loadCategories();
   }, []);
-  //cart nabar mount
+
   useEffect(() => {
     const token = localStorage.getItem("token");
-    if (token) {
+
+    if (token && user?.role !== "admin") {
       dispatch(fetchCart());
     }
-  }, [dispatch]);
+  }, [dispatch, user?.role]);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -131,15 +132,17 @@ const NavBar = () => {
                 Products
               </Link>
             </li>
-            <li className="nav-item me-2">
-              <Link
-                to="/cart"
-                className="nav-link d-flex align-items-center fw-bold"
-              >
-                <BsBagCheck />
-                <span className="ms-1">({count})</span>
-              </Link>
-            </li>
+            {user?.role !== "admin" && (
+              <li className="nav-item me-2">
+                <Link
+                  to="/cart"
+                  className="nav-link d-flex align-items-center fw-bold"
+                >
+                  <BsBagCheck />
+                  <span className="ms-1">({count})</span>
+                </Link>
+              </li>
+            )}
 
             {user?.role === "admin" && (
               <li className="nav-item me-2">

@@ -31,20 +31,21 @@ const ProductDetailPage = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [checkingReview, setCheckingReview] = useState(true);
 
+  // ✅ Measurement state
+  const [selectedMeasurement, setSelectedMeasurement] = useState(null);
+
+  /* ---------------- FETCH PRODUCT + REVIEWS ---------------- */
   useEffect(() => {
-    // Fetch product
     axiosInstance
       .get(`/products/${id}`)
       .then((res) => setProduct(res.data.data))
       .catch(console.error);
 
-    // Fetch reviews
     axiosInstance
       .get(`/reviews/${id}`)
       .then((res) => setReviews(res.data))
       .catch(console.error);
 
-    // Review eligibility check
     const token = localStorage.getItem("token");
     setIsLoggedIn(!!token);
 
@@ -66,12 +67,47 @@ const ProductDetailPage = () => {
       });
   }, [id]);
 
+  /* ---------------- DEFAULT MEASUREMENT ---------------- */
+  // useEffect(() => {
+  //   if (product?.measurementOptions?.length > 0) {
+  //     setSelectedMeasurement(product.measurementOptions[0]);
+  //   }
+  // }, [product]);
+
+  useEffect(() => {
+    if (!product) return;
+
+    if (product.measurementType === "SIZE" && product.sizes?.length > 0) {
+      setSelectedMeasurement(product.sizes[0]); // "S"
+    }
+
+    if (
+      product.measurementType !== "SIZE" &&
+      product.measurementOptions?.length > 0
+    ) {
+      setSelectedMeasurement(product.measurementOptions[0]); // {value, unit}
+    }
+  }, [product]);
+
+  /* ---------------- ADD TO CART ---------------- */
   const handleAddToCart = async () => {
     const token = localStorage.getItem("token");
     if (!token) return navigate("/login");
 
+    if (!selectedMeasurement) {
+      alert("Please select a measurement");
+      return;
+    }
+
     try {
-      await dispatch(addToCartDB(product)).unwrap();
+      await dispatch(
+        addToCartDB({
+          ...product,
+          selectedMeasurement,
+        })
+      ).unwrap();
+      console.log(product);
+
       setSuccessMessage(`${product.title} added to cart successfully!`);
       setTimeout(() => setSuccessMessage(""), 3000);
     } catch (err) {
@@ -79,31 +115,31 @@ const ProductDetailPage = () => {
     }
   };
 
+  /* ---------------- BUY NOW ---------------- */
   const handleBuyNow = () => {
     const token = localStorage.getItem("token");
     if (!token) return navigate("/login");
 
-    navigate("/buyproduct", { state: { product } });
+    if (!selectedMeasurement) {
+      alert("Please select a measurement");
+      return;
+    }
+    console.log(product);
+
+    navigate("/buyproduct", {
+      state: {
+        product,
+        selectedMeasurement,
+      },
+    });
   };
 
+  /* ---------------- SUBMIT REVIEW ---------------- */
   const handleSubmitReview = async () => {
-    // 🔐 Not logged in → redirect
-    if (!isLoggedIn) {
-      navigate("/login");
-      return;
-    }
-
-    // ❌ Logged in but not eligible
-    if (!canReview) {
-      alert("You are not eligible to review this product");
-      return;
-    }
-
-    // ❌ Validation
-    if (!rating || !reviewText.trim()) {
-      alert("Rating and review are required");
-      return;
-    }
+    if (!isLoggedIn) return navigate("/login");
+    if (!canReview) return alert("You are not eligible to review this product");
+    if (!rating || !reviewText.trim())
+      return alert("Rating and review are required");
 
     try {
       await axiosInstance.post("/reviews", {
@@ -113,7 +149,6 @@ const ProductDetailPage = () => {
       });
 
       alert("Review submitted successfully ✅");
-
       setRating(0);
       setReviewText("");
       setCanReview(false);
@@ -125,6 +160,7 @@ const ProductDetailPage = () => {
     }
   };
 
+  /* ---------------- LOADING ---------------- */
   if (!product) {
     return (
       <div className="d-flex justify-content-center align-items-center vh-100">
@@ -133,6 +169,7 @@ const ProductDetailPage = () => {
     );
   }
 
+  /* ====================== UI ====================== */
   return (
     <div className="container mt-4 product-detail-container">
       {successMessage && (
@@ -143,65 +180,84 @@ const ProductDetailPage = () => {
 
       <div className="row">
         <div className="col-md-6 d-flex justify-content-center">
-          <div className="image-zoom-box">
-            <img
-              src={product.image}
-              alt={product.title}
-              className="detail-product-image"
-            />
-          </div>
+          <img
+            src={product.image}
+            alt={product.title}
+            className="detail-product-image"
+          />
         </div>
-        {product && console.log(product)}
+
         <div className="col-md-6">
-          <h2 className="product-title">{product.title}</h2>
+          <h2>{product.title}</h2>
 
-          <div className="price-section">
-            <strike className="text-muted old-price">₹{product.price}</strike>
-            <h4 className="text-success new-price">₹{product.discountPrice}</h4>
-            <p className="text-muted small">MRP (Inclusive of all taxes)</p>
-          </div>
+          <strike className="text-muted">₹{product.price}</strike>
+          <h4 className="text-success">₹{product.discountPrice}</h4>
 
-          <p>
-            <strong>Description:</strong> {product.description}
-          </p>
+          <p>{product.description}</p>
           <p>
             <strong>Category:</strong> {product.category}
           </p>
-          {/* <p>
-            <strong>Ratings :</strong> ⭐{product.rating?.rate}
-          </p> */}
-          <p>
-            <strong>Product ID:</strong> {product._id}
-          </p>
 
-          {product.sizes.length >=1 && (
-            <p>
-              <strong>Sizes Avilable :</strong>
-              {product.sizes}
-            </p>
+
+          {product.measurementType === "SIZE" && product.sizes?.length > 0 && (
+            <div className="mt-3">
+              <strong>SIZE</strong>
+              <div className="d-flex gap-2 mt-2">
+                {product.sizes.map((sz) => (
+                  <Button
+                    key={sz}
+                    size="sm"
+                    variant={
+                      selectedMeasurement === sz
+                        ? "dark"
+                        : "outline-secondary"
+                    }
+                    onClick={() => setSelectedMeasurement(sz)}
+                  >
+                    {sz}
+                  </Button>
+                ))}
+              </div>
+            </div>
           )}
 
-          {product.quantity < 10 && (
-            <span className="badge bg-danger p-2 mb-2">
-              Hurry! Only {product.quantity} left
+          {product.measurementType !== "SIZE" &&
+            product.measurementOptions?.length > 0 && (
+              <div className="mt-3">
+                <strong>{product.measurementType}</strong>
+                <div className="d-flex gap-2 mt-2">
+                  {product.measurementOptions.map((m, i) => (
+                    <Button
+                      key={i}
+                      size="sm"
+                      variant={
+                        selectedMeasurement === m
+                          ? "success"
+                          : "outline-secondary"
+                      }
+                      onClick={() => setSelectedMeasurement(m)}
+                    >
+                      {`${m.value} ${m.unit}`}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+          {/* ✅ STOCK FIX */}
+          {product.stock < 10 && (
+            <span className="badge bg-danger p-2 mt-2">
+              Hurry! Only {product.stock} left
             </span>
           )}
 
-          <div className="d-flex gap-5">
-            <Button
-              onClick={handleBuyNow}
-              variant="success"
-              className="mt-2 btn-fixed"
-            >
+          <div className="d-flex gap-4 mt-3">
+            <Button variant="success" onClick={handleBuyNow}>
               <IoBagCheckOutline className="me-2" />
               Buy Now
             </Button>
 
-            <Button
-              onClick={handleAddToCart}
-              variant="dark"
-              className="mt-2 btn-fixed"
-            >
+            <Button variant="dark" onClick={handleAddToCart}>
               <GiShoppingCart className="me-2" />
               Add to Cart
             </Button>
@@ -210,95 +266,44 @@ const ProductDetailPage = () => {
       </div>
 
       <hr />
-      <h5 className="mt-4">Customer Reviews</h5>
+
+      {/* ================= REVIEWS ================= */}
+      <h5>Customer Reviews</h5>
 
       {reviews.length === 0 && <Alert severity="info">No reviews yet</Alert>}
 
       {reviews.map((r) => (
         <div key={r._id} className="border p-3 mb-3 rounded">
           <strong>{r.user?.fullname}</strong>
-          <span className="badge bg-success ms-2">Verified Buyer</span>
-
           <Rating value={r.rating} readOnly />
-
-          <p className="mb-1">{r.comment}</p>
-
-          <small className="text-muted">
-            {new Date(r.createdAt).toLocaleDateString()}
-          </small>
+          <p>{r.comment}</p>
         </div>
       ))}
 
-      {/* Reviews Section */}
-      <div className="row mt-5">
-        <div className="col-md-8 mx-auto">
-          <h4 className="mb-3">Write a Review</h4>
+      {/* WRITE REVIEW */}
+      {!checkingReview && isLoggedIn && canReview && (
+        <>
+          <textarea
+            className="form-control mb-3"
+            rows="4"
+            value={reviewText}
+            onChange={(e) => setReviewText(e.target.value)}
+          />
 
-          {/* 🔄 Loading */}
-          {checkingReview && (
-            <Alert severity="info">Checking review eligibility...</Alert>
-          )}
+          <Box>
+            <Typography>Your Rating</Typography>
+            <Rating value={rating} onChange={(e, v) => setRating(v)} />
+          </Box>
 
-          {/* ❌ Not logged in */}
-          {!checkingReview && !isLoggedIn && (
-            <Alert severity="info">
-              Please{" "}
-              <span
-                style={{ cursor: "pointer", color: "#1976d2" }}
-                onClick={() => navigate("/login")}
-              >
-                login
-              </span>{" "}
-              to write a review.
-            </Alert>
-          )}
-
-          {/* ❌ Logged in but not eligible */}
-          {!checkingReview && isLoggedIn && !canReview && (
-            <Alert severity="warning">
-              You can only review products you have purchased.
-            </Alert>
-          )}
-
-          {/* ✅ Eligible */}
-          {!checkingReview && isLoggedIn && canReview && (
-            <>
-              <textarea
-                className="form-control mb-3"
-                rows="4"
-                placeholder="Share your experience with this product..."
-                value={reviewText}
-                onChange={(e) => setReviewText(e.target.value)}
-              />
-
-              <Box sx={{ "& > legend": { mt: 2 } }}>
-                <Typography component="legend">Your Rating</Typography>
-                <Rating
-                  name="product-rating"
-                  value={rating}
-                  onChange={(e, val) => setRating(val)}
-                />
-              </Box>
-
-              {/* <Button
-                variant="primary"
-                className="mt-3"
-                onClick={handleSubmitReview}
-              >
-                Submit Review
-              </Button> */}
-              <Button
-                variant="primary"
-                className="mt-3"
-                disabled={!rating || !reviewText.trim()}
-                onClick={handleSubmitReview}
-              >
-                Submit Review
-              </Button>
-            </>
-          )}
-        </div>
-      </div>
+          <Button
+            className="mt-3"
+            disabled={!rating || !reviewText.trim()}
+            onClick={handleSubmitReview}
+          >
+            Submit Review
+          </Button>
+        </>
+      )}
     </div>
   );
 };

@@ -124,7 +124,7 @@ const ProductDetailPage = () => {
       alert("Please select a measurement");
       return;
     }
-    console.log(product);
+    console.log('Products ${product}  selectedMeasurement');
 
     navigate("/buyproduct", {
       state: {

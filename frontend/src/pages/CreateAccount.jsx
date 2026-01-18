@@ -34,7 +34,7 @@ const CreateAccount = () => {
 
       // block if first digit is invalid
       if (value.length === 1 && !/^[6-9]$/.test(value)) {
-        setErrorMsg("Phone number must start with 6, 7, 8, or 9");
+        setErrorMsg("Enter valid Phone number! must start with 6, 7, 8, or 9");
         return;
       }
 

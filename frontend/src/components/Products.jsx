@@ -1,13 +1,9 @@
 // Product.jsx
 import Card from "react-bootstrap/Card";
-// import useFetch from "./customHook/useFetch";
-
 import { Atom } from "react-loading-indicators";
-
 import { useNavigate, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axiosInstance from "../axiosInstance";
-// const API = import.meta.env.VITE_API_BASE_URL;
 
 const Products = () => {
   const navigate = useNavigate();
@@ -42,6 +38,7 @@ const Products = () => {
       p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       p.category.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
   if (loading) {
     return (
       <div className="d-flex justify-content-center align-items-center vh-100">
@@ -49,17 +46,16 @@ const Products = () => {
       </div>
     );
   }
+
   return (
     <div className="container mt-4">
-      <h3 className="my-3">Top Deals</h3>
-      {/* <h2 className="mb-4">Products ({filteredProducts.length})</h2> */}
+      <h3 className="my-3">Top Products</h3>
       <div className="row">
         {filteredProducts.map((product, index) => (
-          <div className="col-md-4 mb-4" key={index}>
-            {/* PRODUCT CARD OPENS A NEW PAGE */}
+          <div className="col-md-3 mb-4" key={index}>
             <Card
               className="h-100 shadow-sm text-center product-card"
-              onClick={() => navigate(`/product/${product._id}`)} // <-- redirect
+              onClick={() => navigate(`/product/${product._id}`)}
               style={{ cursor: "pointer" }}
             >
               <div className="product-card position-relative">
@@ -93,7 +89,6 @@ const Products = () => {
                   </Card.Text>
                 </div>
 
-                {/* Description clamps to 2 lines */}
                 <Card.Text
                   style={{
                     display: "-webkit-box",

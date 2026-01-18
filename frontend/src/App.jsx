@@ -22,18 +22,16 @@ const App = () => {
         {/* ===== Public Routes ===== */}
         <Route path="/" element={<Home />} />
         <Route path="/products" element={<Products />} />
+
         <Route path="/product/:id" element={<ProductDetailPage />} />
+        {/* <ProtectedRoute role="user"></ProtectedRoute> */}
         <Route path="/login" element={<Login />} />
         <Route path="/createaccount" element={<CreateAccount />} />
 
         {/* ===== Protected Routes (Any logged-in user) ===== */}
         <Route
           path="/cart"
-          element={
-            <ProtectedRoute role="user">
-              <Cart />
-            </ProtectedRoute>
-          }
+          element={<ProtectedRoute role="user"></ProtectedRoute>}
         />
 
         <Route

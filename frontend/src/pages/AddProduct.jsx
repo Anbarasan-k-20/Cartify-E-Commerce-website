@@ -45,7 +45,7 @@ const AddProduct = () => {
   const [newCategory, setNewCategory] = useState("");
   const [importFile, setImportFile] = useState(null);
   const [submitted, setSubmitted] = useState(false); // ✅ SIMPLE FLAG
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   useEffect(() => {
     fetchCategories();
   }, []);
@@ -228,7 +228,7 @@ const AddProduct = () => {
           sizes: [],
         });
         setTimeout(() => setSuccess(false), 3000);
-        navigate("/products")
+        navigate("/products");
       }
     } catch (error) {
       console.error(error);

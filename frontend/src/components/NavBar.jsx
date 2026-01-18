@@ -59,7 +59,7 @@ const NavBar = () => {
 
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-dark p-3 shadow-sm">
-      <div className="container d-flex align-items-center justify-content-between">
+      <div className="container-fluid d-flex align-items-center justify-content-between">
         <Link to="/" className="navbar-brand fw-bold d-flex align-items-center">
           <PiShoppingCartSimpleBold size={28} color="grey" className="me-2" />
           CARTIFY
@@ -127,11 +127,11 @@ const NavBar = () => {
                 Home
               </Link>
             </li>
-            <li className="nav-item me-2">
+            {/* <li className="nav-item me-2">
               <Link to="/products" className="nav-link">
                 Products
               </Link>
-            </li>
+            </li> */}
             {user?.role !== "admin" && (
               <li className="nav-item me-2">
                 <Link

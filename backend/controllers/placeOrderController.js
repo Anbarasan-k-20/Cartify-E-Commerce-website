@@ -31,7 +31,7 @@ export const placeOrder = async (req, res) => {
       email,
       deliveryType,
       deliveryFee,
-      codFee,
+      // codFee,
       totalAmount,
     } = req.body;
 
@@ -50,7 +50,7 @@ export const placeOrder = async (req, res) => {
       !phone ||
       !email ||
       deliveryFee == null ||
-      codFee == null ||
+      // codFee == null ||
       totalAmount == null
     ) {
       return res.status(400).json({
@@ -58,12 +58,7 @@ export const placeOrder = async (req, res) => {
         message: "Missing required fields",
       });
     }
-
-    if (
-      !measurement ||
-      typeof measurement.value !== "number" ||
-      !measurement.unit
-    ) {
+    if (!measurement || !measurement.type || measurement.value == null) {
       return res.status(400).json({
         success: false,
         message: "Measurement is required",
@@ -79,13 +74,20 @@ export const placeOrder = async (req, res) => {
     }
 
     // Phone validation (country code required)
-    const phoneWithPlus = `+${phone}`;
-    if (!validator.isMobilePhone(phoneWithPlus, "en-IN")) {
+    // const phoneWithPlus = `+${phone}`;
+    if (!/^\+91[6-9]\d{9}$/.test(phone)) {
       return res.status(400).json({
         success: false,
-        message: "Invalid phone number with country code",
+        message: "Invalid Indian mobile number",
       });
     }
+
+    // if (!validator.isMobilePhone(phoneWithPlus, "en-IN")) {
+    //   return res.status(400).json({
+    //     success: false,
+    //     message: "Invalid phone number with country code",
+    //   });
+    // }
 
     // Email validation
     if (!validator.isEmail(email)) {
@@ -99,7 +101,7 @@ export const placeOrder = async (req, res) => {
     if (
       !Number.isFinite(productPrice) ||
       !Number.isFinite(deliveryFee) ||
-      !Number.isFinite(codFee) ||
+      // !Number.isFinite(codFee) ||
       !Number.isFinite(totalAmount)
     ) {
       return res.status(400).json({
@@ -126,7 +128,7 @@ export const placeOrder = async (req, res) => {
     }
 
     // Total amount verification (anti-tampering)
-    const calculatedTotal = product.discountPrice + deliveryFee + codFee;
+    const calculatedTotal = product.discountPrice + deliveryFee;
 
     if (calculatedTotal !== totalAmount) {
       return res.status(400).json({
@@ -145,18 +147,17 @@ export const placeOrder = async (req, res) => {
       category,
       measurement,
       firstName,
-      lastName, // optional
+      lastName,
       country,
       street,
       apartment,
       city,
       state,
       pin,
-      phone: phoneWithPlus, // E.164 format
+      phone, // ✅ already +91XXXXXXXXXX
       email,
       deliveryType,
       deliveryFee,
-      codFee,
       totalAmount,
       orderStatus: "pending",
       paymentStatus: "pending",

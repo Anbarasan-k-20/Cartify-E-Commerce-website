@@ -29,25 +29,32 @@ const orderSchema = new mongoose.Schema(
     category: {
       type: String,
       required: true,
-    },  // measurement
+    },
+    // measurement
     measurement: {
+      type: {
+        type: String,
+        enum: ["SIZE", "WEIGHT", "VOLUME"],
+        required: true,
+      },
       value: {
-        type: Number,
+        type: mongoose.Schema.Types.Mixed, // string OR number
         required: true,
       },
       unit: {
         type: String,
-        required: true, // kg / g / ml / L / pcs
+        default: null,
       },
     },
+
     firstName: {
       type: String,
       required: true,
       trim: true,
+      default: "",
     },
     lastName: {
       type: String,
-      required: true,
       trim: true,
     },
     company: {
@@ -83,8 +90,9 @@ const orderSchema = new mongoose.Schema(
     phone: {
       type: String,
       required: true,
-      match: [/^\+\d{10,15}$/, "Invalid phone number"],
+      match: [/^\+91[6-9]\d{9}$/, "Invalid Indian mobile number"],
     },
+
     email: {
       type: String,
       required: true,
@@ -96,10 +104,6 @@ const orderSchema = new mongoose.Schema(
       default: "standard",
     },
     deliveryFee: {
-      type: Number,
-      required: true,
-    },
-    codFee: {
       type: Number,
       required: true,
     },

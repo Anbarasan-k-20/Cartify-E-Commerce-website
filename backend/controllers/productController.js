@@ -134,7 +134,7 @@ export const createProduct = async (req, res) => {
       // count,
     } = req.body;
 
-    if (!title || !price || !description || !category) {
+    if (!title || !price || !description || !category || !stock) {
       return res.status(400).json({
         success: false,
         message: "Title, price, description, and category are required",

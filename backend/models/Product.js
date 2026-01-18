@@ -27,7 +27,7 @@ const productSchema = new mongoose.Schema(
     // Discount is optional → default 0 (important fix)
     discountPrice: { type: Number, default: 0 },
 
-    stock: { type: Number, default: 0 },
+    stock: { type: Number, required: true },
 
     /*   * Measurement Type
      *   SIZE → sizes array

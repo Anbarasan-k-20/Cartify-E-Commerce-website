@@ -8,7 +8,7 @@ const ProductCard = ({ product }) => {
     <Card
       className="h-100 shadow-sm text-center product-card"
       onClick={() => {
-        console.log("PRODUCT ID:", product._id);
+        // console.log("PRODUCT ID:", product._id);
         navigate(`/product/${product._id}`);
       }}
       style={{ cursor: "pointer" }}

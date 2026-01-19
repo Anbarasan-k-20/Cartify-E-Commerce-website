@@ -29,9 +29,17 @@ const App = () => {
         <Route path="/createaccount" element={<CreateAccount />} />
 
         {/* ===== Protected Routes (Any logged-in user) ===== */}
-        <Route
+        {/* <Route
           path="/cart"
           element={<ProtectedRoute role="user"></ProtectedRoute>}
+        /> */}
+        <Route
+          path="/cart"
+          element={
+            <ProtectedRoute role="user">
+              <Cart />
+            </ProtectedRoute>
+          }
         />
 
         <Route

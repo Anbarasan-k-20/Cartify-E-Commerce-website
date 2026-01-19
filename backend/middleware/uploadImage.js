@@ -21,9 +21,9 @@ export const upload = multer({
     else
       cb(
         new Error(
-          "Invalid file type. Only JSON, Excel (.xls/.xlsx) and image files are allowed."
+          "Invalid file type. Only JSON, Excel (.xls/.xlsx) and image files are allowed.",
         ),
-        false
+        false,
       );
   },
   limits: {
@@ -44,7 +44,7 @@ export const uploadToCloudinary = async (buffer) => {
       (err, result) => {
         if (err) return reject(err);
         resolve(result.secure_url);
-      }
+      },
     );
     stream.end(buffer);
   });

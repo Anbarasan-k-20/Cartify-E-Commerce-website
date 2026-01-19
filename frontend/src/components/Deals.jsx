@@ -1,9 +1,9 @@
 // components/Deals.jsx
 import { useState, useEffect } from "react";
-import deal1 from "../assets/ecom-Assets/baner-1.jpg";
-import deal2 from "../assets/ecom-Assets/baner-2.jpg";
+import deal1 from "../assets/ecom-Assets/baner-2.jpg";
+import deal2 from "../assets/ecom-Assets/baner-1.jpg";
 import deal3 from "../assets/ecom-Assets/baner-3.avif";
-import deal4 from "../assets/ecom-Assets/baner-4.jpg";
+import deal4 from "../assets/ecom-Assets/baner-5.avif";
 
 // 👉 DEALS ARRAY (HARDCODED)
 const deals = [deal1, deal2, deal3, deal4];
@@ -56,7 +56,7 @@ const Deals = () => {
           className="position-absolute top-50 start-0 translate-middle-y btn btn-light rounded-circle border-0 shadow-sm"
           onClick={() =>
             setActiveDealIndex((prev) =>
-              prev === 0 ? deals.length - 1 : prev - 1
+              prev === 0 ? deals.length - 1 : prev - 1,
             )
           }
           style={{

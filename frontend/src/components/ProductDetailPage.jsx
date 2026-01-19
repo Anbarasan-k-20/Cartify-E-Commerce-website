@@ -34,6 +34,10 @@ const ProductDetailPage = () => {
   // ✅ Measurement state
   const [selectedMeasurement, setSelectedMeasurement] = useState(null);
 
+  // for similar Products
+
+  const [similarProducts, setSimilarProducts] = useState([]);
+
   /* ---------------- FETCH PRODUCT + REVIEWS ---------------- */
   useEffect(() => {
     axiosInstance
@@ -68,11 +72,6 @@ const ProductDetailPage = () => {
   }, [id]);
 
   /* ---------------- DEFAULT MEASUREMENT ---------------- */
-  // useEffect(() => {
-  //   if (product?.measurementOptions?.length > 0) {
-  //     setSelectedMeasurement(product.measurementOptions[0]);
-  //   }
-  // }, [product]);
 
   useEffect(() => {
     if (!product) return;
@@ -87,6 +86,36 @@ const ProductDetailPage = () => {
     ) {
       setSelectedMeasurement(product.measurementOptions[0]); // {value, unit}
     }
+  }, [product]);
+
+  //for More Similar products
+  // useEffect(() => {
+  //   if (!product?.category) return;
+
+  //   axiosInstance
+  //     .get(`/products?category=${encodeURIComponent(product.category)}`)
+  //     .then((res) => {
+  //       const filtered = res.data.data.filter((p) => p._id !== product._id);
+  //       setSimilarProducts(filtered);
+  //     })
+  //     .catch(console.error);
+  // }, [product]);
+
+  useEffect(() => {
+    if (!product?.category) return;
+
+    axiosInstance
+      .get(`/products?category=${encodeURIComponent(product.category)}`)
+      .then((res) => {
+        const filtered = res.data.data.filter(
+          (p) =>
+            p.category === product.category && // 🔐 hard rule
+            p._id !== product._id,
+        );
+
+        setSimilarProducts(filtered);
+      })
+      .catch(console.error);
   }, [product]);
 
   /* ---------------- ADD TO CART ---------------- */
@@ -104,7 +133,7 @@ const ProductDetailPage = () => {
         addToCartDB({
           ...product,
           selectedMeasurement,
-        })
+        }),
       ).unwrap();
       console.log(product);
 
@@ -124,7 +153,7 @@ const ProductDetailPage = () => {
       alert("Please select a measurement");
       return;
     }
-    console.log('Products ${product}  selectedMeasurement');
+    console.log("Products ${product}  selectedMeasurement");
 
     navigate("/buyproduct", {
       state: {
@@ -198,7 +227,6 @@ const ProductDetailPage = () => {
             <strong>Category:</strong> {product.category}
           </p>
 
-
           {product.measurementType === "SIZE" && product.sizes?.length > 0 && (
             <div className="mt-3">
               <strong>SIZE</strong>
@@ -208,9 +236,7 @@ const ProductDetailPage = () => {
                     key={sz}
                     size="sm"
                     variant={
-                      selectedMeasurement === sz
-                        ? "dark"
-                        : "outline-secondary"
+                      selectedMeasurement === sz ? "dark" : "outline-secondary"
                     }
                     onClick={() => setSelectedMeasurement(sz)}
                   >
@@ -265,10 +291,51 @@ const ProductDetailPage = () => {
         </div>
       </div>
 
+      {/* More Similar Produucts */}
+
+      <div className="my-4">
+        <h4 className="mb-4 text-center">More Products You May Like</h4>
+        {similarProducts.length > 0 && (
+          <>
+            <hr />
+            <h5 className="mb-3">You might also like</h5>
+            <div
+              className="d-flex gap-3 overflow-hidden pb-3"
+              style={{ whiteSpace: "nowrap" }}
+            >
+              {similarProducts.map((item) => (
+                <div
+                  key={item._id}
+                  className="card"
+                  style={{ minWidth: "320px", cursor: "pointer" }}
+                  onClick={() => navigate(`/product/${item._id}`)}
+                >
+                  <img
+                    src={item.image}
+                    className="card-img-top"
+                    alt={item.title}
+                    style={{ height: "180px", objectFit: "cover" }}
+                  />
+
+                  <div className="card-body">
+                    <h6 className="card-title text-truncate">{item.title}</h6>
+
+                    <p className="mb-1 text-success fw-bold">
+                      ₹{item.discountPrice}
+                    </p>
+
+                    <small className="text-muted">{item.category}</small>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+      </div>
       <hr />
 
       {/* ================= REVIEWS ================= */}
-      <h5>Customer Reviews</h5>
+      <h5 className="my-2">Customer Reviews</h5>
 
       {reviews.length === 0 && <Alert severity="info">No reviews yet</Alert>}
 
